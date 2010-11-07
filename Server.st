@@ -18,7 +18,9 @@ Object subclass: IPAServer [
 
     IPAServer class >> listenOn: anAddr port: aPort [
         ^ (self new)
-            addr: anAddr port: aPort.
+            addr: anAddr port: aPort;
+            listen;
+            yourself
     ]
 
     addr: anAddr port: aPort [
