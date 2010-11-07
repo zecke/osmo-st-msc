@@ -28,5 +28,19 @@ Object subclass: IPAServer [
     ]
 
     listen [
+        socket := Sockets.ServerSocket
+                    port: port
+                    bindTo: (Sockets.SocketAddress byName: addr).
+    ]
+
+    serve [
+	[true] whileTrue: [ | con |
+            socket waitForConnection.
+
+            con := socket accept.
+            con logNotice: 'New BSC connection' area: #bsc.
+            con close.
+
+        ]
     ]
 ]
