@@ -2,7 +2,7 @@ PackageLoader fileInPackage: 'OsmoNetwork'.
 
 
 Object subclass: IPAConnection [
-    | socket bsc rx tx |
+    | socket demuxer writeQueue muxer dispatcher |
     <comment: 'I represent one Connection to a BSC. I have virtual
 connections hanging off my tree and I will destroy them when my connection
 is going away.'>
@@ -14,7 +14,14 @@ is going away.'>
     ]
 
     socket: aSocket [
-       socket := aSocket.
+        socket := aSocket.
+        writeQueue := SharedQueue new.
+
+        demuxer := Osmo.IPADemuxer initOn: socket.
+        muxer := Osmo.IPAMuxer initOn: writeQueue.
+
+        dispatcher := Osmo.IPADispatcher new.
+        dispatcher initialize.
     ]
 
     process [
