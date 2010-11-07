@@ -8,7 +8,19 @@ connections hanging off my tree and I will destroy them when my connection
 is going away.'>
 
     IPAConnection class >> createOn: aSocket [
-        
+        ^ (self new)
+            socket: aSocket;
+            yourself
+    ]
+
+    socket: aSocket [
+       socket := aSocket.
+    ]
+
+    process [
+        "Drive the BSC process. This will send/queue messages"
+        socket logNotice: 'closing down' area: #bsc.
+        socket close.
     ]
 ]
 
@@ -36,13 +48,12 @@ Object subclass: IPAServer [
     ]
 
     serve [
-	[true] whileTrue: [ | con |
+	[true] whileTrue: [ | ipa |
             socket waitForConnection.
 
-            con := socket accept.
-            con logNotice: 'New BSC connection' area: #bsc.
-            con close.
-
+            ipa := IPAConnection createOn: socket accept.
+            ipa logNotice: 'New BSC connection' area: #bsc.
+            [ipa process] fork.
         ]
     ]
 ]
