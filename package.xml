@@ -1,0 +1,15 @@
+<package>
+    <name>OsmoMSC</name>
+    <namespace>OsmoMSC</namespace>
+    <prereq>OsmoNetwork</prereq>
+    <prereq>OsmoLogging</prereq>
+
+    <filein>VLR.st</filein>
+    <filein>HLR.st</filein>
+
+    <test>
+        <sunit>OsmoMSC.HLRTest</sunit>
+        <sunit>OsmoMSC.VLRTest</sunit>
+        <filein>Test.st</filein>
+    </test>
+</package>
