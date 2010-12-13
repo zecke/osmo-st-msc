@@ -1,11 +1,12 @@
 Object subclass: BSCConfig [
-    | lacs password |
+    | name lacs password |
     <comment: 'I represent a BSC configuration'>
+    <category: 'osmo-msc-private'>
 
-    BSCConfig class >> initialize: aPassword [
+    BSCConfig class >> withName: aName [
         ^ (self new)
             initialize;
-            password: aPassword;
+            name: aName;
             yourself
     ]
 
@@ -13,12 +14,38 @@ Object subclass: BSCConfig [
         lacs := OrderedCollection new.
     ]
 
-    password: aPassword [
-        password := aPassword.
-    ]
+    " simple setter/getter "
+    name: aName [ name := aName.]
+    name [ ^ name ]
+
+    password: aPassword [ password := aPassword. ]
+    password [ ^ password ]
 
     addLac: aLac [
        lacs add: aLac. 
     ]
+
+    lacs [
+        ^ lacs
+    ]
 ]
 
+Object subclass: BSCManager [
+    | bscs |
+    <comment: 'I represent the BSC config.'>
+
+    BSCManager class >> new [
+        ^ (super new)
+            initialize;
+            yourself.
+    ]
+
+    initialize [
+        bscs := OrderedCollection new.
+    ]
+
+    addBsc: aName [
+        | bsc |
+        bsc := BSCConfig withName: aName.
+    ]
+]
