@@ -4,6 +4,7 @@
     <prereq>OsmoNetwork</prereq>
     <prereq>OsmoLogging</prereq>
 
+    <filein>Logging.st</filein>
     <filein>VLR.st</filein>
     <filein>HLR.st</filein>
 
