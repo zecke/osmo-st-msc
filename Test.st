@@ -105,3 +105,32 @@ TestCase subclass: BSCConfigTest [
         self assert: cfg bscList size = 0 description: 'All BSCsshould be removed'.
     ]
 ]
+
+TestCase subclass: BSCListenerTest [
+    <comment: 'Test some basic socket functionality'>
+
+    testListenAndStop [
+        | listener res |
+        listener := BSCListener initWith: '127.0.0.1' port: 9245.
+
+        'Will attempt to stop the connection' printNl.
+        [(Delay forSeconds: 2) wait. listener stop] fork.
+        res := listener serve.
+        self assert: res not.
+
+        "Test that it will work again"
+        'Will attempt to stop the connection2' printNl.
+        listener start.
+        [(Delay forSeconds: 2) wait. listener stop] fork.
+        res := listener serve.
+        self assert: res not.
+    ]
+
+    testListenOnDeadSocket [
+        | listener res |
+        listener := BSCListener initWith: '127.0.0.1' port: 9245.
+        listener stop.
+        res := listener serve.
+        self assert: res not.
+    ]
+]
