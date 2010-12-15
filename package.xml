@@ -1,8 +1,8 @@
 <package>
     <name>OsmoMSC</name>
     <namespace>OsmoMSC</namespace>
-    <prereq>OsmoNetwork</prereq>
     <prereq>OsmoLogging</prereq>
+    <prereq>OsmoNetwork</prereq>
 
     <filein>Logging.st</filein>
     <filein>VLR.st</filein>
