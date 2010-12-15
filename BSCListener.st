@@ -19,16 +19,20 @@
 PackageLoader fileInPackage: 'Sockets'.
 
 Object subclass: BSCListener [
-    | ip port socket |
+    | ip port socket handler |
 
     <comment: 'I listen for incoming BSC connections and will
     authenticate them based on a definable criteria. Right now
     this is based on IP address'>
 
-    BSCListener class >> initWith: bscIP port: bscPort [
+    BSCListener class >> initWith: bscIP port: bscPort handler: aHandler [
         ^ self new
-            initSocket: bscIP port: bscPort; start;
+            initSocket: bscIP port: bscPort; start; handler: aHandler;
             yourself
+    ]
+
+    handler: aHandler [
+        handler := aHandler.
     ]
 
     initSocket: anIP port: aPort [
@@ -46,7 +50,9 @@ Object subclass: BSCListener [
                     ^ false
                 ].
 
-                con close.
+                handler isNil
+                    ifTrue: [con clone.]
+                    ifFalse:[handler newConnection: con].
             ] on: SystemExceptions.FileError do: [:each |
                 self logNotice: 'BSC-Socket: FileError on connection handling.' area: #bsc.
                 ^ false.

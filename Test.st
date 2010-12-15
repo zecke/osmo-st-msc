@@ -111,7 +111,7 @@ TestCase subclass: BSCListenerTest [
 
     testListenAndStop [
         | listener res |
-        listener := BSCListener initWith: '127.0.0.1' port: 9245.
+        listener := BSCListener initWith: '127.0.0.1' port: 9245 handler: nil.
 
         'Will attempt to stop the connection' printNl.
         [(Delay forSeconds: 2) wait. listener stop] fork.
@@ -128,9 +128,28 @@ TestCase subclass: BSCListenerTest [
 
     testListenOnDeadSocket [
         | listener res |
-        listener := BSCListener initWith: '127.0.0.1' port: 9245.
+        listener := BSCListener initWith: '127.0.0.1' port: 9245 handler: nil.
         listener stop.
         res := listener serve.
         self assert: res not.
+    ]
+]
+
+TestCase subclass: MSCBSCConnectionHandlerTest [
+    <comment: 'I should test the feature that each config can only
+    be connected once but that is not done yet. It requires some work
+    on socket code. TODO!!!'>
+
+    testOnlyOnce [
+"
+        | msc socket bsc |
+        msc := MSCApplication new.
+        msc bscConfig addBSC: '127.0.0.1' withName: 'foo' andLac: 4711.
+        bsc := msc bscConfig bscList first.
+
+        socket := DummySocket new.
+        socket instVarNamed: #peer put: bsc peer.
+        socket instVarNamed: #closed put: false.
+"
     ]
 ]
