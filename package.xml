@@ -7,10 +7,12 @@
     <filein>Logging.st</filein>
     <filein>VLR.st</filein>
     <filein>HLR.st</filein>
+    <filein>BSCConfig.st</filein>
 
     <test>
         <sunit>OsmoMSC.HLRTest</sunit>
         <sunit>OsmoMSC.VLRTest</sunit>
+        <sunit>OsmoMSC.BSCConfigTest</sunit>
         <filein>Test.st</filein>
     </test>
 </package>

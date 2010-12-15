@@ -56,3 +56,52 @@ TestCase subclass: VLRTest [
         self assert: sub1 = sub2.
     ]
 ]
+
+TestCase subclass: BSCConfigTest [
+    <comment: 'I will test the BSCConfig'>
+
+    testConfigItem [
+        | item1 item2 addr |
+        addr := Sockets.SocketAddress byName: '127.0.0.1'.
+        item1 := BSCConfigItem initWith: '127.0.0.1' name: 'test1'.
+        item2 := BSCConfigItem initWith: addr name: 'test2'.
+
+        self assert: item1 name = 'test1'.
+        self assert: item1 peer = addr.
+        self assert: item1 lac = -1.
+        self assert: item1 connected not.
+
+        self assert: item2 name = 'test2'.
+        self assert: item2 peer = addr.
+        self assert: item2 lac = -1.
+        self assert: item2 connected not.
+    ]
+
+    testConfig [
+        | cfg |
+
+        "Test that adding stuff again is refused"
+
+        cfg := BSCConfig new.
+        self shouldnt:
+            [cfg addBSC: '127.0.0.1' withName: 'abc1' andLac: 2311]
+            raise: Exception description: 'Simply adding it'.
+        self should:
+            [cfg addBSC: '127.0.0.1' withName: 'abc2' andLac: 1123]
+            raise: Exception description: 'Same IP is forbidden'.
+        self should:
+            [cfg addBSC: '127.0.0.2' withName: 'abc3' andLac: 2311]
+            raise: Exception description: 'Different IP same lac'.
+        self shouldnt:
+            [cfg addBSC: '127.0.0.2' withName: 'abc4' andLac: 1123]
+            raise: Exception description: 'Different IP, different lac'.
+
+        self assert: cfg bscList size = 2 description: 'Two BSCs should be registered'.
+
+
+        cfg removeBSC: '127.0.0.1'.
+        self assert: cfg bscList size = 1 description: 'One BSC should be gone'.
+        cfg removeBSCByLac: 1123.
+        self assert: cfg bscList size = 0 description: 'All BSCsshould be removed'.
+    ]
+]
