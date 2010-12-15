@@ -62,16 +62,18 @@ Object subclass: MSCBSCConnectionHandler [
                 bsc process. 
             ] on: SystemExceptions.EndOfStream do: [:ex |
                 aConfig connected: false.
-                self logNotice: 'BSC disconnected for lac', (aConfig lac asString)
+                self logNotice: 'BSC disconnected for lac: %1' % {aConfig lac}
                      area: #bsc.
             ] on: Exception do: [:ex |
-                self logError: 'Unexpected exception for lac', (aConfig lac asString)
+                self logError: 'Unexpected exception for lac: %1' % {aConfig lac}
                     area: #bsc.
             ]] ensure: [
-                self logNotice: 'BSC being disconnected' area: #bsc. 
+                self logNotice: 'BSC being disconnected for lac: %1' % {aConfig lac}
+                    area: #bsc. 
                 bsc terminateAll.
                 self connections remove: bsc ifAbsent: [
-                    self logError: 'BSC was never added?' area: #bsc].
+                    self logError: 'BSC was never added on lac: %1?' % {aConfig lac}
+                        area: #bsc].
 
                 aConfig connected: false.
                 aConnection close.
@@ -87,7 +89,8 @@ Object subclass: MSCBSCConnectionHandler [
         msc bscConfig bscList do: [:each |
             each peer = peer ifTrue: [
                 each connected ifTrue: [
-                    self logError: 'BSC-Socket: Still connected.' area: #bsc.
+                    self logError: 'BSC-Socket: Still connected for lac: %1' % {each lac}
+                            area: #bsc.
                     aConnection close.
                     ^ false
                 ].
