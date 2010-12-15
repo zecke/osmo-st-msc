@@ -18,15 +18,16 @@
 
 PackageLoader fileInPackage: 'OsmoNetwork'.
 
-Object subclass: IPAConnection [
-    | socket demuxer writeQueue muxer dispatcher |
-    <comment: 'I represent one Connection to a BSC. I have virtual
-connections hanging off my tree and I will destroy them when my connection
-is going away.'>
+Object subclass: BSCIPAConnection [
+    | socket config demuxer writeQueue muxer dispatcher |
+    <comment: 'I represent one Connection to a BSC and use the IPA
+     protocol to exchange messages. I will be executed from within
+     a thread and can do a blocking read from in here.'>
 
-    IPAConnection class >> createOn: aSocket [
+    BSCIPAConnection class >> createOn: aSocket withConfig: aConfig [
         ^ (self new)
             socket: aSocket;
+            instVarNamed: #config put: aConfig;
             yourself
     ]
 
@@ -45,5 +46,10 @@ is going away.'>
         "Drive the BSC process. This will send/queue messages"
         socket logNotice: 'closing down' area: #bsc.
         socket close.
+    ]
+
+    terminateAll [
+        "Bring down everything that happens for this BSC. This is a reset"
+        self logNotice: 'BSC lac: %1 terminating.' % {config lac} area: #bsc.
     ]
 ]

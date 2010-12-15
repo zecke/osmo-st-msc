@@ -9,6 +9,7 @@
     <filein>HLR.st</filein>
     <filein>BSCConfig.st</filein>
     <filein>BSCListener.st</filein>
+    <filein>BSCIPAConnection.st</filein>
     <filein>MSC.st</filein>
 
     <test>
@@ -17,6 +18,7 @@
         <sunit>OsmoMSC.BSCConfigTest</sunit>
         <sunit>OsmoMSC.BSCListenerTest</sunit>
         <sunit>OsmoMSC.MSCBSCConnectionHandlerTest</sunit>
+        <sunit>OsmoMSC.BSCIPAConnectionTest</sunit>
         <filein>Test.st</filein>
     </test>
 </package>

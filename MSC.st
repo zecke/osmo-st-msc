@@ -27,7 +27,7 @@ Object subclass: MSCConfig [
 ]
 
 Object subclass: MSCBSCConnectionHandler [
-    | msc |
+    | msc connections |
 
     <comment: 'I take incoming connections, find a handler for them and
     will register them. I will be passed to the BSCListener'>
@@ -37,14 +37,29 @@ Object subclass: MSCBSCConnectionHandler [
                 instVarNamed: #msc put: aMSC; yourself
     ] 
 
+    connections [ ^ connections ifNil: [connections := OrderedCollection new]]
+
     setupConnection: aConnection on: aConfig [
+        | bsc |
         self logNotice: 'BSC-Socket: New Connection for lac', (aConfig lac asString)
              area: #bsc.
+
+        "Create the BSC first and then assume it is present"
+        [
+            bsc := BSCIPAConnection createOn: aConnection withConfig: aConfig.
+        ] on: Exception do: [:ex |
+            self logError: 'BSC: Creating a handler failed.' area: #bsc.
+            ex printNl.
+            aConnection close.
+            ^ false
+        ].
+
 
         [
             [[
                 aConfig connected: true.
-                aConnection next.
+                self connections add: bsc.
+                bsc process. 
             ] on: SystemExceptions.EndOfStream do: [:ex |
                 aConfig connected: false.
                 self logNotice: 'BSC disconnected for lac', (aConfig lac asString)
@@ -54,6 +69,10 @@ Object subclass: MSCBSCConnectionHandler [
                     area: #bsc.
             ]] ensure: [
                 self logNotice: 'BSC being disconnected' area: #bsc. 
+                bsc terminateAll.
+                self connections remove: bsc ifAbsent: [
+                    self logError: 'BSC was never added?' area: #bsc].
+
                 aConfig connected: false.
                 aConnection close.
             ].

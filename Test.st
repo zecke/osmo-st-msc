@@ -153,3 +153,12 @@ TestCase subclass: MSCBSCConnectionHandlerTest [
 "
     ]
 ]
+
+TestCase subclass: BSCIPAConnectionTest [
+    <comment: 'I just do some simple smoke testing here'>
+
+    testSmoke [
+        | ipa |
+        ipa := BSCIPAConnection createOn: 23 withConfig: 'hi'.
+    ]
+]
