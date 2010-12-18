@@ -18,6 +18,11 @@
 
 PackageLoader fileInPackage: 'OsmoNetwork'.
 
+Exception subclass: BSCTerminated [
+    <comment: 'I am a signal that the BSC Connection terminated and
+    resources needs to be freed now.'>
+]
+
 OsmoGSM.SCCPHandler subclass: BSCSCCPHandler [
     | bsc handlers mutex |
     <comment: 'I handle SCCP for the MSC/BSC connection'>
@@ -40,10 +45,11 @@ OsmoGSM.SCCPHandler subclass: BSCSCCPHandler [
         proc := [
             "Wait for the process to be registered"
             start wait.
-            [
+            [[
                 "Do the work here"
                 self logNotice: 'Processing for new SCCP connection %1.' % {aConnection srcRef} area: #bsc.
                 (Delay forSeconds: 3) wait.
+            ] on: BSCTerminated do: [Processor activeProcess terminate.]
             ] ensure: [
                 "Make sure to terminate"
                 aConnection release.
@@ -78,14 +84,10 @@ OsmoGSM.SCCPHandler subclass: BSCSCCPHandler [
         | copy |
         <category: 'cleanup'>
 
-        copy := self handlers copy.
+        copy := mutex critical: [self handlers copy].
         copy do: [:each |
             self logNotice: 'Terminating process %1' % {each} area: #bsc.
-            each terminate.
-
-            "Work around bug"
-            each terminate.
-            each terminate.
+            each queueInterrupt: [BSCTerminated new signal].
         ].
 
         "Now all connections should slowly terminate and the resources be freed"
