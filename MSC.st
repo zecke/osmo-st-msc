@@ -67,6 +67,7 @@ Object subclass: MSCBSCConnectionHandler [
             ] on: Exception do: [:ex |
                 self logError: 'Unexpected exception for lac: %1' % {aConfig lac}
                     area: #bsc.
+                thisContext backtraceOn: Transcript.
             ]] ensure: [
                 self logNotice: 'BSC being disconnected for lac: %1' % {aConfig lac}
                     area: #bsc. 

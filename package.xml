@@ -3,6 +3,7 @@
     <namespace>OsmoMSC</namespace>
     <prereq>OsmoLogging</prereq>
     <prereq>OsmoNetwork</prereq>
+    <prereq>OsmoGSM</prereq>
 
     <filein>Logging.st</filein>
     <filein>VLR.st</filein>
