@@ -19,24 +19,81 @@
 PackageLoader fileInPackage: 'OsmoNetwork'.
 
 OsmoGSM.SCCPHandler subclass: BSCSCCPHandler [
-    | bsc |
+    | bsc handlers mutex |
     <comment: 'I handle SCCP for the MSC/BSC connection'>
 
     BSCSCCPHandler class >> initWith: aBSC [
         ^ self new
-            instVarNamed: #bsc put: aBSC; yourself
+            instVarNamed: #bsc put: aBSC;
+            instVarNamed: #mutex put: Semaphore forMutualExclusion;
+            yourself
+    ]
+
+    handle: aConnection [
+        | start proc removed |
+        "Maybe I got this wrong but we have to be very careful to get
+        this process started and registered."
+
+        removed := false.
+        start := Semaphore new.
+
+        proc := [
+            "Wait for the process to be registered"
+            start wait.
+            [
+                "Do the work here"
+                self logNotice: 'Processing for new SCCP connection %1.' % {aConnection srcRef} area: #bsc.
+                (Delay forSeconds: 3) wait.
+            ] ensure: [
+                "Make sure to terminate"
+                aConnection release.
+
+                mutex critical: [
+                    removed := true.
+                    self handlers remove: Processor activeProcess ifAbsent: [].
+                    self logNotice: 'Removed process for SCCP connection %1.'
+                         % {aConnection srcRef} area: #bsc.
+                ].
+            ]
+        ] fork.
+
+        mutex critical: [
+            removed ifFalse: [
+                self handlers add: proc.
+                start signal.
+            ]
+        ]
     ]
 
     newConnection: aConnection [
         self logNotice: 'New incoming SCCP connection %1 on the BSC %2'
              % {aConnection srcRef. bsc lac} area: #bsc.
 
-        aConnection release.
+        self handle: aConnection.
+    ]
+
+    handlers [ <category: 'handler'> ^ handlers ifNil: [handlers := OrderedCollection new]]
+
+    terminate [
+        | copy |
+        <category: 'cleanup'>
+
+        copy := self handlers copy.
+        copy do: [:each |
+            self logNotice: 'Terminating process %1' % {each} area: #bsc.
+            each terminate.
+
+            "Work around bug"
+            each terminate.
+            each terminate.
+        ].
+
+        "Now all connections should slowly terminate and the resources be freed"
     ]
 ]
 
 Object subclass: BSCIPAConnection [
-    | socket config demuxer writeQueue muxer dispatcher sccp tx |
+    | socket config demuxer writeQueue muxer dispatcher sccp tx terminated |
     <comment: 'I represent one Connection to a BSC and use the IPA
      protocol to exchange messages. I will be executed from within
      a thread and can do a blocking read from in here.'>
@@ -85,6 +142,8 @@ Object subclass: BSCIPAConnection [
     ]
 
     send: aMsg with: aType [
+        terminated = true ifTrue: [^false].
+
         muxer nextPut: aMsg with: aType.
     ]
 
@@ -105,8 +164,9 @@ Object subclass: BSCIPAConnection [
 
     terminateAll [
         "Bring down everything that happens for this BSC. This is a reset"
+        terminated := true.
         self logNotice: 'BSC lac: %1 terminating.' % {self lac} area: #bsc.
-
+        sccp terminate.
         self class terminate: tx.
     ]
 ]
