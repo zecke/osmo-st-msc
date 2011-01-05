@@ -10,6 +10,7 @@
     <filein>HLR.st</filein>
     <filein>BSCConfig.st</filein>
     <filein>BSCListener.st</filein>
+    <filein>GSMProcessor.st</filein>
     <filein>BSCIPAConnection.st</filein>
     <filein>MSC.st</filein>
 

@@ -46,7 +46,7 @@ Object subclass: MSCBSCConnectionHandler [
 
         "Create the BSC first and then assume it is present"
         [
-            bsc := BSCIPAConnection createOn: aConnection withConfig: aConfig.
+            bsc := BSCIPAConnection createOn: aConnection withConfig: aConfig msc: msc.
         ] on: Exception do: [:ex |
             self logError: 'BSC: Creating a handler failed.' area: #bsc.
             ex printNl.

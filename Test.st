@@ -159,6 +159,6 @@ TestCase subclass: BSCIPAConnectionTest [
 
     testSmoke [
         | ipa |
-        ipa := BSCIPAConnection createOn: 23 withConfig: 'hi'.
+        ipa := BSCIPAConnection createOn: 23 withConfig: 'hi' msc: 0.
     ]
 ]

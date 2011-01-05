@@ -24,12 +24,13 @@ Exception subclass: BSCTerminated [
 ]
 
 OsmoGSM.SCCPHandler subclass: BSCSCCPHandler [
-    | bsc handlers mutex |
+    | bsc msc handlers mutex |
     <comment: 'I handle SCCP for the MSC/BSC connection'>
 
-    BSCSCCPHandler class >> initWith: aBSC [
+    BSCSCCPHandler class >> initWith: aBSC msc: aMSC [
         ^ self new
             instVarNamed: #bsc put: aBSC;
+            instVarNamed: #msc put: aMSC;
             instVarNamed: #mutex put: Semaphore forMutualExclusion;
             yourself
     ]
@@ -48,7 +49,7 @@ OsmoGSM.SCCPHandler subclass: BSCSCCPHandler [
             [[
                 "Do the work here"
                 self logNotice: 'Processing for new SCCP connection %1.' % {aConnection srcRef} area: #bsc.
-                (Delay forSeconds: 3) wait.
+                (GSMProcessor initWith: aConnection msc: msc) process.
             ] on: BSCTerminated do: [Processor activeProcess terminate.]
             ] ensure: [
                 "Make sure to terminate"
@@ -95,15 +96,16 @@ OsmoGSM.SCCPHandler subclass: BSCSCCPHandler [
 ]
 
 Object subclass: BSCIPAConnection [
-    | socket config demuxer writeQueue muxer dispatcher sccp tx terminated |
+    | socket config demuxer writeQueue muxer dispatcher sccp tx terminated msc ipa |
     <comment: 'I represent one Connection to a BSC and use the IPA
      protocol to exchange messages. I will be executed from within
      a thread and can do a blocking read from in here.'>
 
-    BSCIPAConnection class >> createOn: aSocket withConfig: aConfig [
+    BSCIPAConnection class >> createOn: aSocket withConfig: aConfig msc: aMsc [
         ^ (self new)
             socket: aSocket;
             instVarNamed: #config put: aConfig;
+            instVarNamed: #msc put: aMsc;
             yourself
     ]
 
