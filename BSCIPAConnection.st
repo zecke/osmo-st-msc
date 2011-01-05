@@ -128,7 +128,12 @@ Object subclass: BSCIPAConnection [
         dispatcher := Osmo.IPADispatcher new.
         dispatcher initialize.
 
-        sccp := BSCSCCPHandler initWith: self.
+        ipa := Osmo.IPAProtoHandler new.
+        ipa registerOn: dispatcher.
+        ipa muxer: muxer.
+        ipa token: 'abc'.
+
+        sccp := BSCSCCPHandler initWith: self msc: msc.
         sccp registerOn: dispatcher.
         sccp connection: self.
 
