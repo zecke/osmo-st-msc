@@ -1,5 +1,5 @@
 "
- (C) 2010 by Holger Hans Peter Freyther
+ (C) 2010-2011 by Holger Hans Peter Freyther
  All Rights Reserved
 
  This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,8 @@
 
 Object subclass: MSCConfig [
     | ip port |
+    <category: 'MSC-IP'>
+    <comment: 'I contain a very simple MSC config for IP based BSCs'>
 
     bscIP: aIP     [ ip := aIP ]
     bscPort: aPort [ port := aPort ]

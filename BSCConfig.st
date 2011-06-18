@@ -16,8 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 "
 
+PackageLoader fileInPackage: #Sockets.
+
 Object subclass: BSCConfigItem [
     | peer token name lac connected |
+    <category: 'MSC-BSC'>
+    <comment: 'I hold the configuration for one BJSC Item. It consists of the
+peer address, the lac, if it is connected'>
+
     BSCConfigItem class >> initWith: aPeer name: aName [
         ^ self new
             peer: aPeer; name: aName; lac: -1; connected: false; yourself
@@ -57,6 +63,7 @@ Object subclass: BSCConfigItem [
 
 Object subclass: BSCConfig [
     | bscList |
+    <category: 'MSC-BSC'>
     <comment: 'I know the BSCs that can connect to me'>
 
     removeBSC: aPeer [

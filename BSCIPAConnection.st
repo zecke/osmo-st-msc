@@ -1,5 +1,5 @@
 "
- (C) 2010 by Holger Hans Peter Freyther
+ (C) 2010-2011 by Holger Hans Peter Freyther
  All Rights Reserved
 
  This program is free software: you can redistribute it and/or modify
@@ -24,74 +24,28 @@ Exception subclass: BSCTerminated [
 ]
 
 OsmoGSM.SCCPHandler subclass: BSCSCCPHandler [
-    | bsc msc handlers mutex |
+    | bsc msc |
     <comment: 'I handle SCCP for the MSC/BSC connection'>
 
     BSCSCCPHandler class >> initWith: aBSC msc: aMSC [
         ^ self new
             instVarNamed: #bsc put: aBSC;
             instVarNamed: #msc put: aMSC;
-            instVarNamed: #mutex put: Semaphore forMutualExclusion;
             yourself
     ]
 
-    handle: aConnection [
-        | start proc removed |
-        "Maybe I got this wrong but we have to be very careful to get
-        this process started and registered."
+    connectionSpecies [
+        ^ GSMProcessor
+    ]
 
-        removed := false.
-        start := Semaphore new.
-
-        proc := [
-            "Wait for the process to be registered"
-            start wait.
-            [[
-                "Do the work here"
-                self logNotice: 'Processing for new SCCP connection %1.' % {aConnection srcRef} area: #bsc.
-                (GSMProcessor initWith: aConnection msc: msc) process.
-            ] on: BSCTerminated do: [Processor activeProcess terminate.]
-            ] ensure: [
-                "Make sure to terminate"
-                aConnection release.
-
-                mutex critical: [
-                    removed := true.
-                    self handlers remove: Processor activeProcess ifAbsent: [].
-                    self logNotice: 'Removed process for SCCP connection %1.'
-                         % {aConnection srcRef} area: #bsc.
-                ].
-            ]
-        ] fork.
-
-        mutex critical: [
-            removed ifFalse: [
-                self handlers add: proc.
-                start signal.
-            ]
-        ]
+    msc [
+        ^ msc
     ]
 
     newConnection: aConnection [
         self logNotice: 'New incoming SCCP connection %1 on the BSC %2'
              % {aConnection srcRef. bsc lac} area: #bsc.
-
-        self handle: aConnection.
-    ]
-
-    handlers [ <category: 'handler'> ^ handlers ifNil: [handlers := OrderedCollection new]]
-
-    terminate [
-        | copy |
-        <category: 'cleanup'>
-
-        copy := mutex critical: [self handlers copy].
-        copy do: [:each |
-            self logNotice: 'Terminating process %1' % {each} area: #bsc.
-            each queueInterrupt: [BSCTerminated new signal].
-        ].
-
-        "Now all connections should slowly terminate and the resources be freed"
+        ^ super newConnection: aConnection.
     ]
 ]
 
@@ -175,7 +129,7 @@ Object subclass: BSCIPAConnection [
         "Bring down everything that happens for this BSC. This is a reset"
         terminated := true.
         self logNotice: 'BSC lac: %1 terminating.' % {self lac} area: #bsc.
-        sccp terminate.
         self class terminate: tx.
+        sccp linkSetFailed.
     ]
 ]

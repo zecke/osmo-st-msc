@@ -1,5 +1,5 @@
 "
- (C) 2010 by Holger Hans Peter Freyther
+ (C) 2010-2011 by Holger Hans Peter Freyther
  All Rights Reserved
 
  This program is free software: you can redistribute it and/or modify
@@ -18,61 +18,61 @@
 
 PackageLoader fileInPackage: 'OsmoGSM'.
 
-Object subclass: GSMProcBase [
+Object subclass: GSMTransaction [
+    | sapi ti |
+    <comment: 'I am the base for everything that goes on in a
+GSM transaction on a given SAPI'>
+
+    GSMTransaction class >> on: sapi with: ti [
+        <category: 'creation'>
+        ^ self new
+            instVarNamed: #sapi put: sapi;
+            instVarNamed: #ti put: ti;
+            yourself
+    ]
+
+    cancel [
+    ]
 ]
 
-Object subclass: GSMProcessor [
-    | sccp msc |
+GSMTransaction subclass: GSMLURequest [
+    <comment: 'I handle a Location Updating Request'>
+]
+
+OsmoGSM.SCCPConnectionBase subclass: GSMProcessor [
+    | transactions |
+
     <comment: 'I am driving one subscriber connection'>
     <import: OsmoGSM>
 
-    GSMProcessor class >> initWith: aConnection msc: aMsc [
-        ^ self new
-            instVarNamed: #sccp put: aConnection;
-            instVarNamed: #msc put: aMsc;
-            yourself.
-    ]
-
-    handleLU: aMsg [
-        | msg | 
-        "I handle the LU procedure on this connection"
-
-        "Ask for both identities"
-        msg := GSM48IdentityReq new.
-        msg idType type: GSM48IdentityType typeIMSI.
-        sccp nextPutData: (BSSAPDTAP initWith: msg linkIdentifier: 0).
-
-        msg := sccp next.
-
-        aMsg mi inspect.
-    ]
-
-    process [
-        | msg bssmap data gsm|
+    data: aData [
+        | msg bssmap data |
 
         "The first message should be a Complete Layer3 Information"
-        msg := sccp next.
+        msg := aData data.
 
         msg class msgType = BSSAPHelper msgManagemnt ifFalse: [
-            ^ self logError: 'Wrong initial message on %1' % {sccp srcRef} area: #msc.
+            ^ self logError: 'Wrong initial message on %1' % {self srcRef} area: #msc.
         ].
 
         bssmap := msg data.
         bssmap type = GSM0808Helper msgComplL3 ifFalse: [
-            ^ self logError: 'Should be complete layer3 on %1' % {sccp srcRef} area: #msc.
+            ^ self logError: 'Should be complete layer3 on %1' % {self srcRef} area: #msc.
         ].
 
         bssmap findIE: GSMCellIdentifier elementId ifAbsent: [
-            ^ self logError: 'CellIdentifier not present on %1' % {sccp srcRef} area: #msc.
+            ^ self logError: 'CellIdentifier not present on %1' % {self srcRef} area: #msc.
         ].
         data := bssmap findIE: GSMLayer3Info elementId ifAbsent: [
-            ^ self logError: 'Layer3Infor not present on %1' % {sccp srcRef} area: #msc.
+            ^ self logError: 'Layer3Infor not present on %1' % {self srcRef} area: #msc.
         ].
 
         "This is now the GSM data"
-        gsm := data data.
-        gsm type = GSM48LURequest messageType ifTrue: [
-            self handleLU: gsm.
-        ]
+    ]
+
+    terminate [
+        "Cancel all transactions"
+        transactions do: [:each |
+            each cancel]
     ]
 ]
