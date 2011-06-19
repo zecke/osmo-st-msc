@@ -1,1 +1,27 @@
-This is a simple MSC done in smalltalk.
+This is a simple MSC done in Smalltalk.
+
+
+== Objects and their relationship ==
+
+=== MSC ===
+ - MSC has a VLR, HLR, BSCConfig, MSCBSCConnectionHandler
+ - MSC can serve a BSC on TCP depending on the MSCConfig with
+   the BSCListener
+
+=== BSCListener ===
+ - BSCListener will wait for incoming connections and hand them
+   to the MSCBSCConnectionHandlerMSC. This will try to find the
+   configured peer and might do the connection.
+
+=== MSCBSCConnectionHandler ===
+  - Get's a new connection from the BSCListener, will fork and
+    serve the BSC using the BSCIPAConnection. This is done to
+    remember if a given system is already connected or not.
+
+=== BSCIPAConnection ===
+  - Handles IPA mux/demux on the socket...
+  - Has a SCCPHandler
+  - Uses GSMProcessor to process the GSM part of it.
+
+=== GSMProcessor ===
+  - Handles GSM connections, transaction and such.
