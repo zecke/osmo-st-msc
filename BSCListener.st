@@ -27,7 +27,9 @@ Object subclass: BSCListener [
 
     BSCListener class >> initWith: bscIP port: bscPort handler: aHandler [
         ^ self new
-            initSocket: bscIP port: bscPort; start; handler: aHandler;
+            initSocket: bscIP port: bscPort;
+            handler: aHandler;
+            start;
             yourself
     ]
 
@@ -51,7 +53,7 @@ Object subclass: BSCListener [
                 ].
 
                 handler isNil
-                    ifTrue: [con clone.]
+                    ifTrue: [con close]
                     ifFalse:[handler newConnection: con].
             ] on: SystemExceptions.FileError do: [:each |
                 self logNotice: 'BSC-Socket: FileError on connection handling.' area: #bsc.
@@ -61,9 +63,12 @@ Object subclass: BSCListener [
     ]
 
     start [
-        socket := Sockets.ServerSocket
-                    port: port bindTo: (Sockets.SocketAddress byName: ip).
-
+        [
+            socket := Sockets.ServerSocket
+                port: port bindTo: (Sockets.SocketAddress byName: ip).
+        ] on: SystemExceptions.FileError do: [:e |
+            e logException: 'BSC-Socket: Failed to bind.' area: #bsc.
+        ]
     ]
 
     stop [

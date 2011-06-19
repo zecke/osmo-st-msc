@@ -101,7 +101,10 @@ Object subclass: MSCBSCConnectionHandler [
                 self setupConnection: aConnection on: each.
                 ^ true
             ].
-        ]
+        ].
+
+        self logError: 'BSC-Socket: Unknown connection from %1' % {peer} area: #bsc.
+        aConnection close.
     ]
 ]
 
