@@ -11,6 +11,7 @@
     <filein>BSCConfig.st</filein>
     <filein>BSCListener.st</filein>
     <filein>GSMProcessor.st</filein>
+    <filein>GSMMOCall.st</filein>
     <filein>BSCIPAConnection.st</filein>
     <filein>MSC.st</filein>
 

@@ -18,6 +18,38 @@
 
 PackageLoader fileInPackage: 'OsmoGSM'.
 
+OsmoGSM.BSSAPMessage extend [
+    dispatchTrans: aCon [
+        aCon bssapUnknownData: self
+    ]
+]
+
+OsmoGSM.BSSAPManagement extend [
+    dispatchTrans: aCon [
+        self dispatchMAP: aCon.
+    ]
+
+    dispatchMAP: aCon [
+        (Dictionary from: {
+            OsmoGSM.GSM0808Helper msgComplL3   -> #mapLayer3:.
+            OsmoGSM.GSM0808Helper msgClearReq  -> #mapClearReq:.
+            OsmoGSM.GSM0808Helper msgClearComp -> #mapClearCompl:.
+            OsmoGSM.GSM0808Helper msgCipherModeCmpl -> #mapCipherModeCompl:.
+            OsmoGSM.GSM0808Helper msgAssComplete -> #mapAssComplete:.
+            }) at: self data type ifPresent: [:sel |
+            ^ aCon perform: sel with: self.
+        ].
+
+        ^ aCon mapUnknown: self.
+    ]
+]
+
+OsmoGSM.BSSAPDTAP extend [
+    dispatchTrans: aCon [
+        aCon dispatchDTAP: self.
+    ]
+]
+
 Object subclass: GSMTransaction [
     | sapi ti con |
     <comment: 'I am the base for everything that goes on in a
@@ -28,6 +60,7 @@ GSM transaction on a given SAPI'>
         ^ self new
             instVarNamed: #sapi put: sapi;
             instVarNamed: #ti put: ti;
+            initialize;
             yourself
     ]
 
@@ -39,6 +72,10 @@ GSM transaction on a given SAPI'>
     cancel [
     ]
 
+    dispatch: aMsg [
+        self subclassResponsibility
+    ]
+
     nextPutSapi: aMsg [
         <category: 'output'>
         ^ self nextPut: (OsmoGSM.BSSAPDTAP initWith: aMsg linkIdentifier: sapi)
@@ -48,29 +85,15 @@ GSM transaction on a given SAPI'>
         <category: 'output'>
         con nextPutData: aMsg
     ]
+
+    logUnknown: aMsg [
+        <category: 'logging'>
+        self logError: 'Unknown message %1' % {aMsg class}.
+    ]
 ]
 
 GSMTransaction subclass: GSMLURequest [
     <comment: 'I handle a Location Updating Request'>
-]
-
-GSMTransaction subclass: GSMMOCall [
-    | seq |
-    <comment: 'I handle Mobile-Originated calls'>
-
-    nextPutSapi: aMsg [
-        <category: 'output'>
-        aMsg ti: (ti bitOr: 8).
-        ^ super nextPutSapi: aMsg.
-    ]
-
-    initial [
-        | msg |
-        <category: 'transaction'>
-
-        msg := OsmoGSM.GSM48CCProceeding new.
-        self nextPutSapi: msg.
-    ]
 ]
 
 OsmoGSM.SCCPConnectionBase subclass: GSMProcessor [
@@ -89,35 +112,46 @@ hosting various transactions and dispatching to them.'>
         | msg bssmap data |
 
         "The first message should be a Complete Layer3 Information"
-        msg := aData data.
-        msg inspect.
-
-        msg class msgType = BSSAPHelper msgManagemnt ifFalse: [
-            ^ self logError: 'Wrong initial message on %1' % {self srcRef} area: #msc.
-        ].
-
-        bssmap := msg data.
-        bssmap type = GSM0808Helper msgComplL3 ifFalse: [
-            ^ self logError: 'Should be complete layer3 on %1' % {self srcRef} area: #msc.
-        ].
-
-        bssmap findIE: GSMCellIdentifier elementId ifAbsent: [
-            ^ self logError: 'CellIdentifier not present on %1' % {self srcRef} area: #msc.
-        ].
-        data := bssmap findIE: GSMLayer3Info elementId ifAbsent: [
-            ^ self logError: 'Layer3Infor not present on %1' % {self srcRef} area: #msc.
-        ].
-        data inspect.
+        aData data dispatchTrans: self.
 
         (GSMMOCall on: 0 with: 0)
             con: self;
             initial.
+    ]
 
+    bssapUnknownData: aData [
+        <category: 'private'>
         "This is now the GSM data"
-        self release.
+        self conManager critical: [self release].
+    ]
+
+    mapLayer3: aData [
+        <category: 'BSSMAP'>
+        'MAP Layer3' printNl.
+    ]
+
+    mapClearReq: aData [
+        <category: 'BSSMAP'>
+        'CLEAR Request' printNl.
+    ]
+
+    mapClearCompl: aData [
+        <category: 'BSSMAP'>
+        'CLEAR COMPL' printNl.
+    ]
+
+    mapCipherModeCompl: aData [
+        <category: 'BSSMAP'>
+        'CIPHER MODE COMPL' printNl.
+    ]
+
+    mapAssComplete: aData [
+        <category: 'BSSMAP'>
+        'ASSIGNMENT COMPL' printNl.
     ]
 
     terminate [
+        <category: 'private'>
         "Cancel all transactions"
         transactions do: [:each |
             each cancel]
