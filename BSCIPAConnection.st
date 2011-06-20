@@ -18,11 +18,6 @@
 
 PackageLoader fileInPackage: 'OsmoNetwork'.
 
-Exception subclass: BSCTerminated [
-    <comment: 'I am a signal that the BSC Connection terminated and
-    resources needs to be freed now.'>
-]
-
 OsmoGSM.SCCPHandler subclass: BSCSCCPHandler [
     | bsc msc |
     <comment: 'I handle SCCP for the MSC/BSC connection'>
