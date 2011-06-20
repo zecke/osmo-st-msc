@@ -97,57 +97,94 @@ GSMTransaction subclass: GSMLURequest [
 ]
 
 OsmoGSM.SCCPConnectionBase subclass: GSMProcessor [
-    | transactions |
+    | transactions state |
 
     <comment: 'I am driving a SCCP Connection. This consists of being
 hosting various transactions and dispatching to them.'>
     <import: OsmoGSM>
 
+    GSMProcessor class >> stateInitial [<category: 'states'> ^ 0 ]
+    GSMProcessor class >> stateAcked   [<category: 'states'> ^ 1 ]
+    GSMProcessor class >> stateRelease [<category: 'states'> ^ 2 ]
+    GSMProcessor class >> stateError   [<category: 'states'> ^ 3 ]
+
     initialize [
+        <category: 'creation'>
         transactions := OrderedCollection new.
+        state := self class stateInitial.
         ^ super initialize.
     ]
 
     data: aData [
         | msg bssmap data |
+        <category: 'input'>
 
         "The first message should be a Complete Layer3 Information"
-        aData data dispatchTrans: self.
+        [
+            aData data dispatchTrans: self.
+        ] on: Error do: [:e |
+            e logException: 'Failed to dispatch: %1' % {e tag} area: #bsc.
+            self forceClose.
+        ]
+    ]
+
+    bssapUnknownData: aData [
+        <category: 'BSSMAP'>
+        "This is now the GSM data"
+        self forceClose.
+    ]
+
+    mapLayer3: bssap [
+        | layer3 |
+        <category: 'BSSMAP'>
+
+        "Check and move state"
+        self verifyState: [state = self class stateInitial].
+        state := self class stateAcked.
+
+        "TODO: Add verifications"
+        bssap data findIE: OsmoGSM.GSMCellIdentifier elementId ifAbsent: [
+            ^ self logError: 'CellIdentifier not present on %1' % {self srcRef} area: #msc.
+        ].
+
+        layer3 := bssap data findIE: OsmoGSM.GSMLayer3Info elementId ifAbsent: [
+            ^ self logError: 'Layer3Infor not present on %1' % {self srcRef} area: #msc.
+        ].
+
+
+        layer3 inspect.
 
         (GSMMOCall on: 0 with: 0)
             con: self;
             initial.
-    ]
 
-    bssapUnknownData: aData [
-        <category: 'private'>
-        "This is now the GSM data"
-        self conManager critical: [self release].
-    ]
-
-    mapLayer3: aData [
-        <category: 'BSSMAP'>
-        'MAP Layer3' printNl.
+        self clearCommand: 9.
     ]
 
     mapClearReq: aData [
         <category: 'BSSMAP'>
         'CLEAR Request' printNl.
+        self verifyState: [(state > self class stateInitial) and: [state < self class stateError]].
+
+        self clearCommand: 0.
     ]
 
     mapClearCompl: aData [
         <category: 'BSSMAP'>
-        'CLEAR COMPL' printNl.
+        self verifyState: [state = self class stateRelease].
+        self release.
     ]
 
     mapCipherModeCompl: aData [
         <category: 'BSSMAP'>
         'CIPHER MODE COMPL' printNl.
+        aData inspect.
     ]
 
     mapAssComplete: aData [
         <category: 'BSSMAP'>
         'ASSIGNMENT COMPL' printNl.
+        aData inspect.
     ]
 
     terminate [
@@ -155,5 +192,39 @@ hosting various transactions and dispatching to them.'>
         "Cancel all transactions"
         transactions do: [:each |
             each cancel]
+    ]
+
+    verifyState: aBlock [
+        <category: 'private'>
+
+        aBlock value ifFalse: [
+            self logError: 'GSMProc(srcref:%1) wrong state: %2.' % {self srcRef. state} area: #bsc.
+            ^ self error: 'Failed to verify the state.'.
+        ].
+    ]
+
+    forceClose [
+        <category: 'private'>
+        sem critical: [
+            state = self class stateError ifTrue: [
+                "Already closing down"
+                ^ false
+            ].
+
+            state := self class stateError
+        ].
+
+        self release
+    ]
+
+    clearCommand: aCause [
+        | msg |
+        <category: 'private'>
+
+        state := self class stateRelease.
+
+        msg := OsmoGSM.IEMessage initWith: OsmoGSM.GSM0808Helper msgClear.
+        msg addIe: (OsmoGSM.GSMCauseIE initWith: aCause).
+        self nextPutData: (OsmoGSM.BSSAPManagement initWith: msg).
     ]
 ]
