@@ -19,7 +19,7 @@
 PackageLoader fileInPackage: 'OsmoGSM'.
 
 Object subclass: GSMTransaction [
-    | sapi ti |
+    | sapi ti con |
     <comment: 'I am the base for everything that goes on in a
 GSM transaction on a given SAPI'>
 
@@ -31,7 +31,22 @@ GSM transaction on a given SAPI'>
             yourself
     ]
 
+    con: aCon [
+        <category: 'creation'>
+        con := aCon.
+    ]
+
     cancel [
+    ]
+
+    nextPutSapi: aMsg [
+        <category: 'output'>
+        ^ self nextPut: (OsmoGSM.BSSAPDTAP initWith: aMsg linkIdentifier: sapi)
+    ]
+
+    nextPut: aMsg [
+        <category: 'output'>
+        con nextPutData: aMsg
     ]
 ]
 
@@ -39,17 +54,43 @@ GSMTransaction subclass: GSMLURequest [
     <comment: 'I handle a Location Updating Request'>
 ]
 
+GSMTransaction subclass: GSMMOCall [
+    | seq |
+    <comment: 'I handle Mobile-Originated calls'>
+
+    nextPutSapi: aMsg [
+        <category: 'output'>
+        aMsg ti: (ti bitOr: 8).
+        ^ super nextPutSapi: aMsg.
+    ]
+
+    initial [
+        | msg |
+        <category: 'transaction'>
+
+        msg := OsmoGSM.GSM48CCProceeding new.
+        self nextPutSapi: msg.
+    ]
+]
+
 OsmoGSM.SCCPConnectionBase subclass: GSMProcessor [
     | transactions |
 
-    <comment: 'I am driving one subscriber connection'>
+    <comment: 'I am driving a SCCP Connection. This consists of being
+hosting various transactions and dispatching to them.'>
     <import: OsmoGSM>
+
+    initialize [
+        transactions := OrderedCollection new.
+        ^ super initialize.
+    ]
 
     data: aData [
         | msg bssmap data |
 
         "The first message should be a Complete Layer3 Information"
         msg := aData data.
+        msg inspect.
 
         msg class msgType = BSSAPHelper msgManagemnt ifFalse: [
             ^ self logError: 'Wrong initial message on %1' % {self srcRef} area: #msc.
@@ -66,8 +107,14 @@ OsmoGSM.SCCPConnectionBase subclass: GSMProcessor [
         data := bssmap findIE: GSMLayer3Info elementId ifAbsent: [
             ^ self logError: 'Layer3Infor not present on %1' % {self srcRef} area: #msc.
         ].
+        data inspect.
+
+        (GSMMOCall on: 0 with: 0)
+            con: self;
+            initial.
 
         "This is now the GSM data"
+        self release.
     ]
 
     terminate [
