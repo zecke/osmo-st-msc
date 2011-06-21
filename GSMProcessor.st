@@ -50,6 +50,12 @@ OsmoGSM.BSSAPDTAP extend [
     ]
 ]
 
+OsmoGSM.GSM48MSG extend [
+    openTransactionOn: aCon sapi: aSapi [
+        self logError: 'Can not open transaction for %1' % {self class} area: #bsc.
+    ]
+]
+
 Object subclass: GSMTransaction [
     | sapi ti con |
     <comment: 'I am the base for everything that goes on in a
@@ -62,6 +68,17 @@ GSM transaction on a given SAPI'>
             instVarNamed: #ti put: ti;
             initialize;
             yourself
+    ]
+
+    sapi [
+        <category: 'accessing'>
+        ^ sapi
+    ]
+
+    ti [
+        "TODO: This should somehow include the size of the allocation"
+        <category: 'accessing'>
+        ^ ti
     ]
 
     con: aCon [
@@ -139,8 +156,11 @@ hosting various transactions and dispatching to them.'>
         <category: 'BSSMAP'>
 
         "Check and move state"
-        self verifyState: [state = self class stateInitial].
-        state := self class stateAcked.
+        'Dispatching GSM' printNl.
+        sem critical: [
+            self verifyState: [state = self class stateInitial].
+            state := self class stateAcked.
+        ].
 
         "TODO: Add verifications"
         bssap data findIE: OsmoGSM.GSMCellIdentifier elementId ifAbsent: [
@@ -151,28 +171,27 @@ hosting various transactions and dispatching to them.'>
             ^ self logError: 'Layer3Infor not present on %1' % {self srcRef} area: #msc.
         ].
 
-
-        layer3 inspect.
-
-        (GSMMOCall on: 0 with: 0)
-            con: self;
-            initial.
-
-        self clearCommand: 9.
+        'Dispatching GSM' printNl.
+        sem critical: [self dispatchGSM: layer3 data sapi: 0].
     ]
 
     mapClearReq: aData [
         <category: 'BSSMAP'>
         'CLEAR Request' printNl.
-        self verifyState: [(state > self class stateInitial) and: [state < self class stateError]].
 
-        self clearCommand: 0.
+        sem critical: [
+            self verifyState:
+                [(state > self class stateInitial) and: [state < self class stateError]].
+            self clearCommand: 0.
+        ]
     ]
 
     mapClearCompl: aData [
         <category: 'BSSMAP'>
-        self verifyState: [state = self class stateRelease].
-        self release.
+        sem critical: [
+            self verifyState: [state = self class stateRelease].
+            self release.
+        ].
     ]
 
     mapCipherModeCompl: aData [
@@ -190,12 +209,15 @@ hosting various transactions and dispatching to them.'>
     terminate [
         <category: 'private'>
         "Cancel all transactions"
-        transactions do: [:each |
-            each cancel]
+        sem critical: [
+            transactions do: [:each |
+                each cancel]
+        ]
     ]
 
     verifyState: aBlock [
         <category: 'private'>
+        "Must be locked."
 
         aBlock value ifFalse: [
             self logError: 'GSMProc(srcref:%1) wrong state: %2.' % {self srcRef. state} area: #bsc.
@@ -211,20 +233,72 @@ hosting various transactions and dispatching to them.'>
                 ^ false
             ].
 
-            state := self class stateError
+            state := self class stateError.
+            self release
         ].
-
-        self release
     ]
 
     clearCommand: aCause [
         | msg |
         <category: 'private'>
+        "Must be locked"
+
+        "Already clearing it once"
+        state >= self class stateRelease ifTrue: [
+            ^ true.
+        ].
 
         state := self class stateRelease.
 
         msg := OsmoGSM.IEMessage initWith: OsmoGSM.GSM0808Helper msgClear.
         msg addIe: (OsmoGSM.GSMCauseIE initWith: aCause).
         self nextPutData: (OsmoGSM.BSSAPManagement initWith: msg).
+    ]
+
+    checkRelease [
+        "Check if things can be released now"
+        <category: 'private'>
+        "Must be locked"
+
+        "No more transactions, clean things up"
+        transactions isEmpty ifTrue: [
+            self clearCommand: 9.
+        ].
+    ]
+
+    addTransaction: aTran [
+        <category: 'private'>
+        "Must be locked"
+        self logDebug: 'GSMProc(srcref:%1) adding transaction %2' % {self srcRef. aTran class} area: #bsc.
+        transactions add: aTran.
+    ]
+
+    removeTransaction: aTran [
+        <category: 'private'>
+        "Must be locked"
+        self logDebug: 'GSMProc(srcref:%1) removing transaction %2' % {self srcRef. aTran class} area: #bsc.
+        transactions remove: aTran ifAbsent: [
+            self logError: 'GSMProc(srcref:%1) trans not found %2' % {self srcRef. aTran class} area: #bsc.
+        ].
+
+        self checkRelease.
+    ]
+
+    dispatchGSM: aMsg sapi: aSapi [
+        <category: 'private'>
+        "Must be locked"
+        aMsg inspect.
+
+        "Find an active transaction for this"
+        transactions do: [:each |
+            (each sapi = aSapi and: [each ti = aMsg ti]) ifTrue: [
+                each dispatch: aMsg.
+                self checkRelease.
+                ^ true.
+            ].
+        ].
+
+        aMsg openTransactionOn: self sapi: 0.
+        self checkRelease.
     ]
 ]

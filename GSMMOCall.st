@@ -47,7 +47,14 @@ OsmoGSM.GSM48CCReleaseCompl extend [
 ]
 
 OsmoGSM.GSM48CCSetup extend [
-    dispatchTrans: aCon [
+    openTransactionOn: aCon sapi: aSapi [
+        | tran |
+        tran := (GSMMOCall on: aSapi with: self ti)
+                    instVarNamed: #seq put: seq;
+                    con: aCon;
+                    yourself.
+        aCon addTransaction: tran.
+        tran start.
     ]
 ]
 
@@ -71,6 +78,7 @@ GSMTransaction subclass: GSMMOCall [
     nextPutSapi: aMsg [
         <category: 'output'>
         aMsg ti: (ti bitOr: 8).
+        aMsg seq: seq.
         ^ super nextPutSapi: aMsg.
     ]
 
@@ -111,6 +119,18 @@ GSMTransaction subclass: GSMMOCall [
     ]
 
     dispatch: aMsg [
+    ]
+
+    start [
+        <category: 'transaction'>
+        | msg |
+
+        state := self class stateProceeding.
+        msg := OsmoGSM.GSM48CCProceeding new.
+        self nextPutSapi: msg.
+
+        "hack to release things immediately"
+        con removeTransaction: self.
     ]
 ]
 
