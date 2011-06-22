@@ -211,7 +211,11 @@ hosting various transactions and dispatching to them.'>
         "Cancel all transactions"
         sem critical: [
             transactions do: [:each |
-                each cancel]
+                [each cancel] on: Error do: [:e |
+                    e logException: 'GSMProc(srcref:%1) failed cancel: %2' %
+                        {self srcRef. each class} area: #bsc.
+                ]
+            ]
         ]
     ]
 
