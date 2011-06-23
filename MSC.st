@@ -16,6 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 "
 
+PackageLoader fileInPackage: 'OsmoMGCP'.
+
 Object subclass: MSCConfig [
     | ip port |
     <category: 'MSC-IP'>
@@ -108,7 +110,7 @@ Object subclass: MSCBSCConnectionHandler [
 ]
 
 Object subclass: MSCApplication [
-    | hlr vlr config bscListener bscConfig bscConHandler |
+    | hlr vlr config bscListener bscConfig bscConHandler mgcp |
     <comment: 'I am a MSC as I have the VLR/HLR and other instances'>
 
     hlr [ ^ hlr ifNil: [HLRLocalCollection new]]
@@ -117,6 +119,14 @@ Object subclass: MSCApplication [
     config [ ^ config ifNil: [config := MSCConfig new]]
     bscConfig [ ^ bscConfig ifNil: [bscConfig := BSCConfig new]]
     bscConHandler [ ^ bscConHandler ifNil: [bscConHandler := MSCBSCConnectionHandler initWith: self]]
+
+    mgcpCallAgent [
+        <category: 'MGCP-Audio'>
+        ^ mgcp ifNil: [
+            mgcp := (Osmo.MGCPCallAgent startOn: config bscIP)
+                start;
+                yourself]
+    ]
 
     serveBSC [
         "I will start to listen for BSCs"
@@ -138,6 +148,9 @@ Object subclass: MSCApplication [
             bscPort: 5000.
         msc bscConfig
             addBSC: '127.0.0.1' withName: 'test' andLac: 4711.
+
+        "Make sure MGCP is running"
+        msc mgcpCallAgent.
 
         msc logNotice: 'Serving BSCs now' area: #msc.
         [msc serveBSC. 'MSC has exited' printNl] fork.
