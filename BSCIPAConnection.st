@@ -16,7 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 "
 
-PackageLoader fileInPackage: 'OsmoNetwork'.
+PackageLoader
+    fileInPackage: 'OsmoMGCP';
+    fileInPackage: 'OsmoNetwork'.
 
 OsmoGSM.SCCPHandler subclass: BSCSCCPHandler [
     | bsc msc |
@@ -33,8 +35,18 @@ OsmoGSM.SCCPHandler subclass: BSCSCCPHandler [
         ^ GSMProcessor
     ]
 
+    bsc [
+        <category: 'accessing'>
+        ^ bsc
+    ]
+
     msc [
+        <category: 'accessing'>
         ^ msc
+    ]
+
+    handleMsg: aMsg [
+        ^ super handleMsg: aMsg.
     ]
 
     newConnection: aConnection [
@@ -44,16 +56,45 @@ OsmoGSM.SCCPHandler subclass: BSCSCCPHandler [
     ]
 ]
 
-Object subclass: BSCIPAConnection [
-    | socket config demuxer writeQueue muxer dispatcher sccp tx terminated msc ipa |
+Object subclass: BSCConnection [
+    | config msc trunk |
+
+    BSCConnection class >> createOn: aConfig msc: aMsc [
+        <category: 'creation'>
+        ^ self new
+            instVarNamed: #config put: aConfig;
+            instVarNamed: #msc put: aMsc;
+            initialize;
+            yourself
+    ]
+
+    initialize [
+        <category: 'creation'>
+        "I try to initialize the trunk. Right now I force the usage
+        of UDP to the given port and do not support the nat traversal. I
+        also hardcode the kind of audio."
+        trunk := Osmo.MGCPDSTrunk createWithDest: config peer trunkNr: 1.
+    ]
+
+    config [
+        <category: 'accessing'>
+        ^ config
+    ]
+
+    msc [
+        <category: 'accessing'>
+        ^ msc
+    ]
+]
+
+BSCConnection subclass: BSCIPAConnection [
+    | socket demuxer writeQueue muxer dispatcher sccp tx terminated ipa |
     <comment: 'I represent one Connection to a BSC and use the IPA
      protocol to exchange messages. I will be executed from within
      a thread and can do a blocking read from in here.'>
 
     BSCIPAConnection class >> createOn: aSocket withConfig: aConfig msc: aMsc [
-        ^ (self new)
-            instVarNamed: #config put: aConfig;
-            instVarNamed: #msc put: aMsc;
+        ^ (self createOn: aConfig msc: aMsc)
             socket: aSocket;
             yourself
     ]
