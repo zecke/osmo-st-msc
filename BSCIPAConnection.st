@@ -52,9 +52,9 @@ Object subclass: BSCIPAConnection [
 
     BSCIPAConnection class >> createOn: aSocket withConfig: aConfig msc: aMsc [
         ^ (self new)
-            socket: aSocket;
             instVarNamed: #config put: aConfig;
             instVarNamed: #msc put: aMsc;
+            socket: aSocket;
             yourself
     ]
 
