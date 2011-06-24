@@ -399,6 +399,15 @@ hosting various transactions and dispatching to them.'>
         ]
     ]
 
+    takeLocks: aBlock [
+        <category: 'audio-locking'>
+        "Take the locks in lock-order for audio callbacks"
+        conManager critical: [
+            sem critical: [
+                self trunk critical: [
+                    aBlock value]]]
+    ]
+
     sendCRCX [
         | trans crcx |
         <category: 'audio-connect'>
@@ -409,9 +418,9 @@ hosting various transactions and dispatching to them.'>
                     yourself.
         trans command: crcx.
         trans onResult: [:endp :result |
-            conManager critical: [sem critical: [self crcxResult: result]]].
+            self takeLocks: [self crcxResult: result]].
         trans onTimeout: [:endp |
-            conManager critical: [sem critical: [self crcxTimeout]]].
+            self takeLocks: [self crcxTimeout]].
         trans start.
 
         self logDebug: 'GSMProc(srcref:%1) CRCX on %2 with CallID: %3'
@@ -491,9 +500,9 @@ hosting various transactions and dispatching to them.'>
         connId isNil ifFalse: [dlcx parameterAdd: 'I: %1' % {connId}].
         trans command: dlcx.
         trans onResult: [:endp :result |
-            conManager critical: [sem critical: [self dlcxResult: result]]].
+            self takeLocks: [self dlcxResult: result]].
         trans onTimeout: [:endp |
-            conManager critical: [sem critical: [self dlcxTimeout]]].
+            self takeLocks: [self dlcxTimeout]].
         trans start.
     ]
 
