@@ -122,7 +122,7 @@ GSMTransaction subclass: GSMLURequest [
 ]
 
 OsmoGSM.SCCPConnectionBase subclass: GSMProcessor [
-    | transactions state endp callId connId endpRelease |
+    | transactions state endp connId |
 
     <comment: 'I am driving a SCCP Connection. This consists of being
 hosting various transactions and dispatching to them.'>
@@ -347,7 +347,6 @@ hosting various transactions and dispatching to them.'>
                         % {self srcRef} area: #bsc.
                 ^ nil].
 
-            endpRelease := false.
             self sendCRCX.
         ].
     ]
@@ -376,12 +375,11 @@ hosting various transactions and dispatching to them.'>
             endp isUnused ifTrue: [^self].
             endp isReserved ifTrue: [
                 self logDebug: 'GSMProc(srcref:%1) MGCP pending CallID:%2. no release.'
-                        % {self srcRef. callId} area: #bsc.
+                        % {self srcRef. endp callId} area: #bsc.
                 ^ self
             ].
 
-            (endp isUsed and: [endpRelease not]) ifTrue: [
-                endpRelease := true.
+            (endp isUsed and: [endp callId isNil not]) ifTrue: [
                 self sendDLCX.
             ].
         ].
@@ -404,9 +402,9 @@ hosting various transactions and dispatching to them.'>
     sendCRCX [
         | trans crcx |
         <category: 'audio-connect'>
-        callId := self generateCallId.
+        endp callId: self generateCallId.
         trans := Osmo.MGCPTransaction on: endp of: self callAgent.
-        crcx := (Osmo.MGCPCRCXCommand createCRCX: endp callId: callId)
+        crcx := (Osmo.MGCPCRCXCommand createCRCX: endp callId: endp callId)
                     parameterAdd: 'M: recvonly';
                     yourself.
         trans command: crcx.
@@ -417,7 +415,7 @@ hosting various transactions and dispatching to them.'>
         trans start.
 
         self logDebug: 'GSMProc(srcref:%1) CRCX on %2 with CallID: %3'
-                % {self srcRef. endp endpointName. callId} area: #bsc.
+                % {self srcRef. endp endpointName. endp callId} area: #bsc.
     ]
 
     crcxResult: aResult [
@@ -448,12 +446,12 @@ hosting various transactions and dispatching to them.'>
         state = self class stateAcked
             ifTrue:  [
                 self logDebug: 'GSMProc(srcref:%1) CRCX compl(%2) Code: %3.'
-                        % {self srcRef. callId. aResult code} area: #bsc.
+                        % {self srcRef. endp callId. aResult code} area: #bsc.
                 self sendAssignment.
             ]
             ifFalse: [
                 self logDebug: 'GSMProc(srcref:%1) CRCX compl(%2), call gone.'
-                        % {self srcRef. callId} area: #bsc.
+                        % {self srcRef. endp callId} area: #bsc.
                 self releaseAudio.
             ].
     ]
@@ -462,7 +460,7 @@ hosting various transactions and dispatching to them.'>
         <category: 'audio-connect'>
 
         self logDebug: 'GSMProc(srcref:%1) CRCX timeout on %2 with CallID: %3.'
-                % {self srcRef. endp endpointName. callId} area: #bsc.
+                % {self srcRef. endp endpointName. endp callId} area: #bsc.
 
         "Free the endpoint"
         endp used.
@@ -478,17 +476,18 @@ hosting various transactions and dispatching to them.'>
 
         endp free.
         endp := nil.
-        callId := nil.
         connId := nil.
-        endpRelease := false.
     ]
 
     sendDLCX [
         | trans dlcx |
         <category: 'audio-release'>
+        "I sent the DLCX, I also make the endpoint forget the callid. As this
+         is our indicator that things have been cleared or will be cleared."
 
         trans := Osmo.MGCPTransaction on: endp of: self callAgent.
-        dlcx := Osmo.MGCPDLCXCommand createDLCX: endp callId: callId.
+        dlcx := Osmo.MGCPDLCXCommand createDLCX: endp callId: endp callId.
+        endp clearCallId.
         connId isNil ifFalse: [dlcx parameterAdd: 'I: %1' % {connId}].
         trans command: dlcx.
         trans onResult: [:endp :result |
@@ -518,8 +517,6 @@ hosting various transactions and dispatching to them.'>
         self logError: 'GSMProc(srcref:%1) DLCX timedout Endp(%2) stays blocked.'
                 % {self srcRef. endp endpointName} area: #bsc.
         endp := nil.
-        callId := nil.
         connId := nil.
-        endpRelease := false.
     ]
 ]
