@@ -74,6 +74,7 @@ Object subclass: BSCConnection [
         of UDP to the given port and do not support the nat traversal. I
         also hardcode the kind of audio."
         trunk := Osmo.MGCPDSTrunk createWithDest: config peer printString trunkNr: 1.
+        (trunk endpointAt: 1) tryBlock.
     ]
 
     config [
