@@ -198,6 +198,7 @@ hosting various transactions and dispatching to them.'>
         <category: 'BSSMAP'>
         sem critical: [
             self verifyState: [state = self class stateRelease].
+            self releaseAudio.
             self release.
         ].
     ]
