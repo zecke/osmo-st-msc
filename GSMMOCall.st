@@ -54,12 +54,12 @@ OsmoGSM.GSM48CCSetup extend [
                     con: aCon;
                     yourself.
         aCon addTransaction: tran.
-        tran start.
+        tran start: self.
     ]
 ]
 
 GSMTransaction subclass: GSMMOCall [
-    | seq state |
+    | seq state timeout wait_for_ass |
     <comment: 'I handle Mobile-Originated calls as of 5.2.1 of GSM 04.08'>
 
     GSMMOCall class >> stateNull        [ <category: 'states'> ^ 0 ]
@@ -69,6 +69,7 @@ GSMTransaction subclass: GSMMOCall [
     GSMMOCall class >> stateConnectCon  [ <category: 'states'> ^ 4 ]
     GSMMOCall class >> stateDisconnInd  [ <category: 'states'> ^ 5 ]
     GSMMOCall class >> stateReleaseReq  [ <category: 'states'> ^ 6 ]
+    GSMMOCall class >> stateReleaseCompl [ <category: 'states'> ^ 7]
 
     initialize [
         <category: 'creation'>
@@ -119,18 +120,68 @@ GSMTransaction subclass: GSMMOCall [
     ]
 
     dispatch: aMsg [
+        aMsg dispatchMoCall: self.
     ]
 
-    start [
-        <category: 'transaction'>
-        | msg |
+    sendReleaseComplete [
+        | rlc |
+        <category: 'gsm-routines'>
 
-        state := self class stateProceeding.
+        rlc := OsmoGSM.GSM48CCReleaseCompl new.
+        rlc causeOrDefault data: #(16rE1 16r83).
+        self nextPutSapi: rlc.
+    ]
+
+    sendProceeding [
+        | msg |
+        <category: 'gsm-routines'>
+
         msg := OsmoGSM.GSM48CCProceeding new.
         self nextPutSapi: msg.
+    ]
 
-        "hack to release things immediately"
+    releaseComplete [
+        <category: 'transaction'>
+
+        state := self class stateReleaseCompl.
+        self sendReleaseComplete.
         con removeTransaction: self.
+    ]
+
+    start: aCCMessage [
+        <category: 'transaction'>
+
+        "Failed to allocate an endpoint"
+        con allocateEndpoint isNil ifTrue: [
+            self releaseComplete.
+            ^ self
+        ].
+
+        "We are waiting for an assignment"
+        wait_for_ass := true.
+        state := self class stateProceeding.
+        self sendProceeding.
+
+        timeout := Osmo.TimerScheduler instance scheduleInSeconds: 10 block: [
+            "hack to release things immediately"
+            con removeTransaction: self.
+        ]
+    ]
+
+    cancel [
+        timeout ifNotNil: [timeout cancel].
+        ^ super cancel
+    ]
+
+    assignmentFailure [
+        "The assignment failed, let's see if it could be for us"
+        wait_for_ass ifTrue: [
+            self releaseComplete.
+        ]
+    ]
+
+    assignmentSuccess [
+
     ]
 ]
 

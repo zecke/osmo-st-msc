@@ -73,7 +73,7 @@ Object subclass: BSCConnection [
         "I try to initialize the trunk. Right now I force the usage
         of UDP to the given port and do not support the nat traversal. I
         also hardcode the kind of audio."
-        trunk := Osmo.MGCPDSTrunk createWithDest: config peer trunkNr: 1.
+        trunk := Osmo.MGCPDSTrunk createWithDest: config peer printString trunkNr: 1.
     ]
 
     config [
@@ -84,6 +84,11 @@ Object subclass: BSCConnection [
     msc [
         <category: 'accessing'>
         ^ msc
+    ]
+
+    trunk [
+        <category: 'accessing'>
+        ^ trunk
     ]
 ]
 
