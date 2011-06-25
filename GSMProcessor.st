@@ -313,7 +313,6 @@ hosting various transactions and dispatching to them.'>
     dispatchGSM: aMsg sapi: aSapi [
         <category: 'private'>
         "Must be locked"
-        aMsg inspect.
 
         "Find an active transaction for this"
         transactions do: [:each |
