@@ -145,6 +145,7 @@ GSMTransaction subclass: GSMMOCall [
 
         state := self class stateReleaseCompl.
         self sendReleaseComplete.
+        self cancel.
         con removeTransaction: self.
     ]
 
