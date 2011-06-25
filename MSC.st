@@ -19,15 +19,49 @@
 PackageLoader fileInPackage: 'OsmoMGCP'.
 
 Object subclass: MSCConfig [
-    | ip port |
+    | ip port mgcp sip |
     <category: 'MSC-IP'>
     <comment: 'I contain a very simple MSC config for IP based BSCs'>
 
-    bscIP: aIP     [ ip := aIP ]
-    bscPort: aPort [ port := aPort ]
+    bscIP: aIP [
+        <category: 'config'>
+        ip := aIP
+    ]
 
-    bscIP   [ <category: 'accessing'> ^ ip ]
-    bscPort [ <category: 'accessing'> ^ port ]
+    bscIP [
+        <category: 'accessing'>
+        ^ ip
+    ]
+
+    bscPort: aPort [
+        <category: 'config'>
+        port := aPort
+    ]
+
+    bscPort [
+        <category: 'accessing'>
+        ^ port
+    ]
+
+    mgcpIP: aIP [
+        <category: 'config'>
+        mgcp := aIP
+    ]
+
+    mgcpIP [
+        <category: 'accessing'>
+        ^ mgcp ifNil: [ip]
+    ]
+
+    sipIP: aIP [
+        <category: 'config'>
+        sip := aIP
+    ]
+
+    sipIP [
+        <category: 'accessing'>
+        ^ sip ifNil: [ip]
+    ]
 ]
 
 Object subclass: MSCBSCConnectionHandler [
