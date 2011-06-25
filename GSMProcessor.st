@@ -36,6 +36,7 @@ OsmoGSM.BSSAPManagement extend [
             OsmoGSM.GSM0808Helper msgClearComp -> #mapClearCompl:.
             OsmoGSM.GSM0808Helper msgCipherModeCmpl -> #mapCipherModeCompl:.
             OsmoGSM.GSM0808Helper msgAssComplete -> #mapAssComplete:.
+            OsmoGSM.GSM0808Helper msgAssFailure -> #mapAssFailure:.
             }) at: self data type ifPresent: [:sel |
             ^ aCon perform: sel with: self.
         ].
@@ -133,6 +134,21 @@ hosting various transactions and dispatching to them.'>
     GSMProcessor class >> stateRelease [<category: 'states'> ^ 2 ]
     GSMProcessor class >> stateError   [<category: 'states'> ^ 3 ]
 
+    GSMProcessor class >> createAssignment: aMul timeslot: aTs [
+        | ass |
+        <category: 'audio-connect'>
+        ass := IEMessage initWith: GSM0808Helper msgAssRequest.
+        ass
+            addIe: ((GSM0808ChannelTypeIE
+                    initWith: GSM0808ChannelTypeIE speechSpeech
+                    audio: GSM0808ChannelTypeIE speechSpeech)
+                        audioCodecs: {GSM0808ChannelTypeIE speechFullRateVersion3.
+                                      GSM0808ChannelTypeIE speechHalfRateVersion3};
+                        yourself);
+            addIe: (GSM0808CICIE initWithMultiplex: aMul timeslot: aTs).
+        ^ ass
+    ]
+
     initialize [
         <category: 'creation'>
         transactions := OrderedCollection new.
@@ -206,12 +222,6 @@ hosting various transactions and dispatching to them.'>
     mapCipherModeCompl: aData [
         <category: 'BSSMAP'>
         'CIPHER MODE COMPL' printNl.
-        aData inspect.
-    ]
-
-    mapAssComplete: aData [
-        <category: 'BSSMAP'>
-        'ASSIGNMENT COMPL' printNl.
         aData inspect.
     ]
 
@@ -347,7 +357,7 @@ hosting various transactions and dispatching to them.'>
                         % {self srcRef} area: #bsc.
                 ^ nil].
 
-            self sendCRCX.
+            self sendAssignment.
         ].
     ]
 
@@ -373,9 +383,19 @@ hosting various transactions and dispatching to them.'>
         self trunk critical: [
             endp ifNil: [^self].
             endp isUnused ifTrue: [^self].
+
+            "Check if we have ever send a CRCX, if not release it"
             endp isReserved ifTrue: [
-                self logDebug: 'GSMProc(srcref:%1) MGCP pending CallID:%2. no release.'
-                        % {self srcRef. endp callId} area: #bsc.
+                endp callId isNil
+                    ifTrue:  [
+                        self logDebug:
+                            'GSMProc(srcref:%1) MGCP CRCX never sent.'
+                                % {self srcRef} area: #bsc.
+                        endp used. endp free]
+                    ifFalse: [
+                        self logDebug:
+                            'GSMProc(srcref:%1) MGCP pending CallID:%2. no release.'
+                                % {self srcRef. endp callId} area: #bsc.].
                 ^ self
             ].
 
@@ -386,12 +406,40 @@ hosting various transactions and dispatching to them.'>
     ]
 
     sendAssignment [
+        | ass |
         <category: 'audio-connect'>
-        "TODO:"
+
+        "TODO: Maybe start a timer but we are guarded here anyway."
+        ass := self class createAssignment: endp multiplex timeslot: endp timeslot.
+        self nextPutData: (BSSAPManagement initWith: ass).
+    ]
+
+    mapAssComplete: aData [
+        <category: 'audio-connect'>
+
+        sem critical: [self trunk critical: [
+            endp callId isNil ifTrue: [self sendCRCX].
+        ]].
+    ]
+
+    mapAssFailure: aData [
+        <category: 'audio-connect'>
+        sem critical: [self trunk critical: [
+            self logError: 'GSMProc(srcref:%1) GSM0808 Assignment failed.'
+                    % {self srcRef} area: #bsc.
+            self assignmentFailure.]]
+    ]
+
+    assignmentSuccess [
+        <category: 'audio-connect'>
+
+        transactions do: [:each |
+            each assignmentSuccess.
+        ]
     ]
 
     assignmentFailure [
-        <category: 'audio-release'>
+        <category: 'audio-connect'>
         "Tell the transactions that there will be no audio."
 
         transactions do: [:each |
@@ -456,7 +504,7 @@ hosting various transactions and dispatching to them.'>
             ifTrue:  [
                 self logDebug: 'GSMProc(srcref:%1) CRCX compl(%2) Code: %3.'
                         % {self srcRef. endp callId. aResult code} area: #bsc.
-                self sendAssignment.
+                self assignmentSuccess.
             ]
             ifFalse: [
                 self logDebug: 'GSMProc(srcref:%1) CRCX compl(%2), call gone.'
