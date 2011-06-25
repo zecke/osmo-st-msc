@@ -498,6 +498,9 @@ hosting various transactions and dispatching to them.'>
             ^ self
         ].
 
+        "Assign the current SDP file"
+        endp sdp: aResult sdp.
+
         "Check what to do next"
         state = self class stateAcked
             ifTrue:  [
