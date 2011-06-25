@@ -355,8 +355,6 @@ hosting various transactions and dispatching to them.'>
                 self logError: 'GSMProc(srcref:%1) no endpoint availabble.'
                         % {self srcRef} area: #bsc.
                 ^ nil].
-
-            self sendAssignment.
         ].
     ]
 

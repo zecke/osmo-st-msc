@@ -163,6 +163,8 @@ GSMTransaction subclass: GSMMOCall [
         state := self class stateProceeding.
         self sendProceeding.
 
+        con sendAssignment.
+
         timeout := Osmo.TimerScheduler instance scheduleInSeconds: 10 block: [
             "hack to release things immediately"
             con removeTransaction: self.
