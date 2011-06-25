@@ -123,12 +123,12 @@ GSMTransaction subclass: GSMMOCall [
         aMsg dispatchMoCall: self.
     ]
 
-    sendReleaseComplete [
+    sendReleaseComplete: aCause [
         | rlc |
         <category: 'gsm-routines'>
 
         rlc := OsmoGSM.GSM48CCReleaseCompl new.
-        rlc causeOrDefault data: #(16rE1 16r83).
+        rlc causeOrDefault data: aCause.
         self nextPutSapi: rlc.
     ]
 
@@ -144,7 +144,7 @@ GSMTransaction subclass: GSMMOCall [
         <category: 'transaction'>
 
         state := self class stateReleaseCompl.
-        self sendReleaseComplete.
+        self sendReleaseComplete: #(16rE1 16r83).
         self cancel.
         con removeTransaction: self.
     ]
