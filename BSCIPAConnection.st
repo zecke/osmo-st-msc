@@ -157,6 +157,8 @@ BSCConnection subclass: BSCIPAConnection [
 
         socket logNotice: 'Processing for lac %1' % {self lac} area: #bsc.
 
+        self send: {Osmo.IPAConstants msgIdAck} asByteArray with: Osmo.IPAConstants protocolIPA.
+
         [
             | msg |
             msg := demuxer next.
