@@ -50,7 +50,6 @@ OsmoGSM.GSM48CCSetup extend [
     openTransactionOn: aCon sapi: aSapi [
         | tran |
         tran := (GSMMOCall on: aSapi with: self ti)
-                    instVarNamed: #seq put: seq;
                     con: aCon;
                     yourself.
         aCon addTransaction: tran.
@@ -59,7 +58,7 @@ OsmoGSM.GSM48CCSetup extend [
 ]
 
 GSMTransaction subclass: GSMMOCall [
-    | seq state timeout wait_for_ass |
+    | state timeout wait_for_ass |
     <comment: 'I handle Mobile-Originated calls as of 5.2.1 of GSM 04.08'>
 
     GSMMOCall class >> stateNull        [ <category: 'states'> ^ 0 ]
@@ -79,7 +78,7 @@ GSMTransaction subclass: GSMMOCall [
     nextPutSapi: aMsg [
         <category: 'output'>
         aMsg ti: (ti bitOr: 8).
-        aMsg seq: seq.
+        aMsg seq: 0.
         ^ super nextPutSapi: aMsg.
     ]
 
