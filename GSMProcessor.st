@@ -310,6 +310,11 @@ hosting various transactions and dispatching to them.'>
         self checkRelease.
     ]
 
+    dispatchDTAP: aMsg [
+        <category: 'private'>
+        sem critical: [self dispatchGSM: aMsg data sapi: aMsg sapi]
+    ]
+
     dispatchGSM: aMsg sapi: aSapi [
         <category: 'private'>
         "Must be locked"
