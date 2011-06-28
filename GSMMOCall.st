@@ -103,14 +103,17 @@ GSMTransaction subclass: GSMMOCall [
 
     moDisconnect: aMsg [
         <category: 'mo-message'>
+        self sendRelease: #(16rE1 16r90)
     ]
 
     moRelease: aMsg [
         <category: 'mo-message'>
     ]
 
-    moRelaseCompl: aMsg [
+    moReleaseCompl: aMsg [
         <category: 'mo-message'>
+        self cancel.
+        con removeTransaction: self.
     ]
 
     moUnknown: aMsg [
@@ -129,6 +132,14 @@ GSMTransaction subclass: GSMMOCall [
         rlc := OsmoGSM.GSM48CCReleaseCompl new.
         rlc causeOrDefault data: aCause.
         self nextPutSapi: rlc.
+    ]
+
+    sendRelease: aCause [
+        | rel |
+        <category: 'gsm-routines'>
+        rel := OsmoGSM.GSM48CCRelease new.
+        rel causeOrDefault data: aCause.
+        self nextPutSapi: rel.
     ]
 
     sendProceeding [
