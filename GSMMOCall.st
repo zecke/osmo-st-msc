@@ -46,6 +46,12 @@ OsmoGSM.GSM48CCReleaseCompl extend [
     ]
 ]
 
+OsmoGSM.GSM48CCStatus extend [
+    dispatchMoCall: aCon [
+        aCon moStatus: self.
+    ]
+]
+
 OsmoGSM.GSM48CCSetup extend [
     openTransactionOn: aCon sapi: aSapi [
         | tran |
