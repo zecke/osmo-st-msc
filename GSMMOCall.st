@@ -177,7 +177,7 @@ GSMTransaction subclass: GSMMOCall [
 
         timeout := Osmo.TimerScheduler instance scheduleInSeconds: 10 block: [
             "hack to release things immediately"
-            con removeTransaction: self.
+            con conManager critical: [con critical: [con removeTransaction: self]].
         ]
     ]
 
