@@ -141,7 +141,7 @@ hosting various transactions and dispatching to them.'>
         ass
             addIe: ((GSM0808ChannelTypeIE
                     initWith: GSM0808ChannelTypeIE speechSpeech
-                    audio: GSM0808ChannelTypeIE speechSpeech)
+                    audio: GSM0808ChannelTypeIE chanSpeechFullPref)
                         audioCodecs: {GSM0808ChannelTypeIE speechFullRateVersion3.
                                       GSM0808ChannelTypeIE speechHalfRateVersion3};
                         yourself);
