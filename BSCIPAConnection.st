@@ -160,13 +160,17 @@ BSCConnection subclass: BSCIPAConnection [
         self send: {Osmo.IPAConstants msgIdAck} asByteArray with: Osmo.IPAConstants protocolIPA.
 
         [
-            | msg |
-            msg := demuxer next.
-            dispatcher dispatch: msg first with: msg second.
+            self processOne.
         ] repeat.
 
 
         socket close.
+    ]
+
+    processOne [
+        | msg |
+        msg := demuxer next.
+        OsmoDispatcher dispatchBlock: [dispatcher dispatch: msg first with: msg second.]
     ]
 
     terminateAll [
@@ -174,6 +178,6 @@ BSCConnection subclass: BSCIPAConnection [
         terminated := true.
         self logNotice: 'BSC lac: %1 terminating.' % {self lac} area: #bsc.
         self class terminate: tx.
-        sccp linkSetFailed.
+        OsmoDispatcher dispatchBlock: [sccp linkSetFailed].
     ]
 ]
