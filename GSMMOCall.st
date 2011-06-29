@@ -127,6 +127,15 @@ GSMTransaction subclass: GSMMOCall [
         ^ self logUnknown: aMsg.
     ]
 
+    moStatus: aMsg [
+        <category: 'mo-message'>
+        "We did something wrong, just give up and see how it can be fixed."
+        self logError: 'GSMOCall(srcref:%1) something wrong with call state.'
+                % {con srcRef} area: #bsc.
+        self cancel.
+        con removeTransaction: self.
+    ]
+
     dispatch: aMsg [
         aMsg dispatchMoCall: self.
     ]
