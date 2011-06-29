@@ -67,14 +67,14 @@ GSMTransaction subclass: GSMMOCall [
     | state timeout wait_for_ass |
     <comment: 'I handle Mobile-Originated calls as of 5.2.1 of GSM 04.08'>
 
-    GSMMOCall class >> stateNull        [ <category: 'states'> ^ 0 ]
-    GSMMOCall class >> stateProceeding  [ <category: 'states'> ^ 1 ]
-    GSMMOCall class >> stateReceived    [ <category: 'states'> ^ 2 ]
-    GSMMOCall class >> stateConnectReq  [ <category: 'states'> ^ 3 ]
-    GSMMOCall class >> stateConnectCon  [ <category: 'states'> ^ 4 ]
-    GSMMOCall class >> stateDisconnInd  [ <category: 'states'> ^ 5 ]
-    GSMMOCall class >> stateReleaseReq  [ <category: 'states'> ^ 6 ]
-    GSMMOCall class >> stateReleaseCompl [ <category: 'states'> ^ 7]
+    GSMMOCall class >> stateNull        [ <category: 'states'> ^ #null ]
+    GSMMOCall class >> stateProceeding  [ <category: 'states'> ^ #proceeding ]
+    GSMMOCall class >> stateReceived    [ <category: 'states'> ^ #received ]
+    GSMMOCall class >> stateConnectReq  [ <category: 'states'> ^ #connect_request ]
+    GSMMOCall class >> stateConnectCon  [ <category: 'states'> ^ #connect_confirmed ]
+    GSMMOCall class >> stateDisconnInd  [ <category: 'states'> ^ #disconn_ind ]
+    GSMMOCall class >> stateReleaseReq  [ <category: 'states'> ^ #release_req ]
+    GSMMOCall class >> stateReleaseCompl [ <category: 'states'> ^ #release_compl ]
 
     initialize [
         <category: 'creation'>
