@@ -123,7 +123,7 @@ GSMTransaction subclass: GSMLURequest [
 ]
 
 OsmoGSM.SCCPConnectionBase subclass: GSMProcessor [
-    | transactions state endp connId |
+    | transactions state endp connId mgcp_trans |
 
     <comment: 'I am driving a SCCP Connection. This consists of being
 hosting various transactions and dispatching to them.'>
@@ -386,7 +386,7 @@ hosting various transactions and dispatching to them.'>
             endp ifNil: [^self].
             endp isUnused ifTrue: [^self].
 
-            "Check if we have ever send a CRCX, if not release it"
+            "Check if we have ever sent a CRCX, if not release it"
             endp isReserved ifTrue: [
                 endp callId isNil
                     ifTrue:  [
@@ -458,6 +458,26 @@ hosting various transactions and dispatching to them.'>
                     aBlock value]]]
     ]
 
+    mgcpQueueTrans: aTrans [
+        <category: 'audio-connect'>
+        mgcp_trans add: aTrans.
+        mgcp_trans size = 1 ifTrue: [
+            aTrans start.]
+    ]
+
+    mgcpTransFinished: aTrans [
+        <category: 'audio-connect'>
+        mgcp_trans first = aTrans ifFalse: [
+            self logError: 'GSMProc(srcref:%1) wrong MGCP transaction finished.'
+                    % {self srcRef} area: #bsc.
+            ^false].
+
+        mgcp_trans removeFirst.
+        mgcp_trans isEmpty ifFalse: [
+            mgcp_trans first start.
+        ].
+    ]
+
     sendCRCX [
         | trans crcx |
         <category: 'audio-connect'>
@@ -468,9 +488,10 @@ hosting various transactions and dispatching to them.'>
                     yourself.
         trans command: crcx.
         trans onResult: [:endp :result |
-            self takeLocks: [self crcxResult: result]].
+            self takeLocks: [self crcxResult: result. self mgcpTransFinished: trans]].
         trans onTimeout: [:endp |
-            self takeLocks: [self crcxTimeout]].
+            self takeLocks: [self crcxTimeout. self mgcpTransFinished: trans]].
+        mgcp_trans := OrderedCollection with: trans.
         trans start.
 
         self logDebug: 'GSMProc(srcref:%1) CRCX on %2 with CallID: %3'
@@ -553,15 +574,14 @@ hosting various transactions and dispatching to them.'>
         connId isNil ifFalse: [dlcx parameterAdd: 'I: %1' % {connId}].
         trans command: dlcx.
         trans onResult: [:endp :result |
-            self takeLocks: [self dlcxResult: result]].
+            self takeLocks: [self dlcxResult: result. self mgcpTransFinished: trans]].
         trans onTimeout: [:endp |
-            self takeLocks: [self dlcxTimeout]].
-        trans start.
+            self takeLocks: [self dlcxTimeout. self mgcpTransFinished: trans]].
+        self mgcpQueueTrans: trans.
     ]
 
     dlcxResult: aResult [
         <category: 'audio-release'>
-
 
         aResult isSuccess
             ifTrue: [
@@ -580,5 +600,31 @@ hosting various transactions and dispatching to them.'>
                 % {self srcRef. endp endpointName} area: #bsc.
         endp := nil.
         connId := nil.
+    ]
+
+    sendMDCX: aSDPRecord state: aState [
+        | trans mdcx |
+        <category: 'audio-modify'>
+
+        trans := Osmo.MGCPTransaction on: endp of: self callAgent.
+        mdcx := Osmo.MGCPMDCXCommand createMDCX: endp callId: endp callId.
+        mdcx
+            parameterAdd: 'I: %1' % {connId};
+            parameterAdd: 'M: %1' % {aState};
+            sdp: aSDPRecord.
+        
+        trans
+            command: mdcx;
+            onResult: [:endp :result |
+                self takeLocks: [self mdcxResult: result. self mgcpTransFinished: trans]];
+            onTimeout: [:endp |
+                self takeLocks: [self mdcxTimeout. self mgcpTransFinished: trans]].
+        self mgcpQueueTrans: trans.
+    ]
+
+    mdcxResult: aResult [
+    ]
+
+    mdcxTimeout: aTimeout [
     ]
 ]
