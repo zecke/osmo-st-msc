@@ -62,4 +62,9 @@ Osmo.SIPCall subclass: SIPMTCall [
         remoteLeg isNil
             ifFalse: [remoteLeg netTerminate. remoteLeg := nil].
     ]
+
+    sdp [
+        <category: 'audio'>
+        ^ sdp_result
+    ]
 ] 

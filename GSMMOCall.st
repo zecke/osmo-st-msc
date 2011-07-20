@@ -69,9 +69,8 @@ GSMTransaction subclass: GSMMOCall [
 
     GSMMOCall class >> stateNull        [ <category: 'states'> ^ #null ]
     GSMMOCall class >> stateProceeding  [ <category: 'states'> ^ #proceeding ]
-    GSMMOCall class >> stateReceived    [ <category: 'states'> ^ #received ]
-    GSMMOCall class >> stateConnectReq  [ <category: 'states'> ^ #connect_request ]
-    GSMMOCall class >> stateConnectCon  [ <category: 'states'> ^ #connect_confirmed ]
+    GSMMOCall class >> stateConnectInd  [ <category: 'states'> ^ #connect_indication ]
+    GSMMOCall class >> stateActive      [ <category: 'states'> ^ #active ]
     GSMMOCall class >> stateDisconnInd  [ <category: 'states'> ^ #disconn_ind ]
     GSMMOCall class >> stateReleaseReq  [ <category: 'states'> ^ #release_req ]
     GSMMOCall class >> stateReleaseCompl [ <category: 'states'> ^ #release_compl ]
@@ -92,7 +91,10 @@ GSMTransaction subclass: GSMMOCall [
         <category: 'external'>
         "I am called by the other side of the call"
 
-        "TODO"
+        (state = self class stateProceeding) ifTrue: [
+            "TODO: SEND ALERTING"
+            con sendMDCX: nil state: 'recvonly'.
+        ].
     ]
 
     netConnect [
@@ -100,27 +102,43 @@ GSMTransaction subclass: GSMMOCall [
         "I am called by the other side of the call. I will need to get
          the SDP file of this side to send a MGCP message down the stream."
 
-        "TODO"
+        (state = self class stateProceeding) ifTrue: [
+            state := self class stateConnectInd.
+            con sendMDCX: remoteLeg sdp state: 'sendrecv'.
+            self sendConnect.
+        ].
     ]
 
     netTerminate [
         <category: 'external'>
         "The other side of the call has terminated, let
         us do the clean up."
-        remoteLeg := nil.
-
-        state := self class stateDisconnInd.
-        self sendDisconnect: #(16rE1 16r90)
+        remoteLeg isNil ifFalse: [
+            remoteLeg := nil.
+            state := self class stateDisconnInd.
+            self sendDisconnect: #(16rE1 16r90)
+        ].
     ]
 
     moConnectAck: aMsg [
         <category: 'mo-message'>
+        (state = self class stateConnectReq) ifTrue: [
+            self logNotice: 'GSMMOCall(srcref:%1) call is connected.'
+                % {con srcRef} area: #bsc.
+            state := self class stateActive.
+        ].
     ]
 
     moDisconnect: aMsg [
         <category: 'mo-message'>
         state := self class stateDisconnInd.
-        self sendRelease: #(16rE1 16r90)
+        self sendRelease: #(16rE1 16r90).
+
+        "Disconnect the remote"
+        remoteLeg isNil ifFalse: [
+            remoteLeg netTerminate.
+            remoteLeg := nil.
+        ].
     ]
 
     moRelease: aMsg [
@@ -179,6 +197,13 @@ GSMTransaction subclass: GSMMOCall [
         <category: 'gsm-routines'>
 
         msg := OsmoGSM.GSM48CCProceeding new.
+        self nextPutSapi: msg.
+    ]
+
+    sendConnect [
+        | msg |
+        <category: 'gsm-routines'>
+        msg := OsmoGSM.GSM48CCConnect new.
         self nextPutSapi: msg.
     ]
 
