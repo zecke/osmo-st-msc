@@ -65,7 +65,10 @@ OsmoGSM.GSM48CCSetup extend [
 
 GSMTransaction subclass: GSMMOCall [
     | state wait_for_ass remoteLeg |
-    <comment: 'I handle Mobile-Originated calls as of 5.2.1 of GSM 04.08'>
+    <comment: 'I handle Mobile-Originated calls as of 5.2.1 of GSM 04.08. I should
+    represent the states found in Figure 5.1b/3GPP TS 04.08: Overview call controll
+    protocol/Network side. Right now the set of states is incomplete and is mixed
+    for MO and MT. It is not very clear if the text and the state machine fit together.'>
 
     GSMMOCall class >> stateNull        [ <category: 'states'> ^ #null ]
     GSMMOCall class >> stateProceeding  [ <category: 'states'> ^ #proceeding ]
