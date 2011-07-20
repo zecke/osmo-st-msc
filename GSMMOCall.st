@@ -95,8 +95,8 @@ GSMTransaction subclass: GSMMOCall [
         "I am called by the other side of the call"
 
         (state = self class stateProceeding) ifTrue: [
-            "TODO: SEND ALERTING"
-            con sendMDCX: nil state: 'recvonly'.
+            con sendMDCX: remoteLeg sdpAlert state: 'recvonly'.
+            self sendAlerting.
         ].
     ]
 
@@ -200,6 +200,14 @@ GSMTransaction subclass: GSMMOCall [
         <category: 'gsm-routines'>
 
         msg := OsmoGSM.GSM48CCProceeding new.
+        self nextPutSapi: msg.
+    ]
+
+    sendAlerting [
+        | msg |
+        <category: 'gsm-routines'>
+
+        msg := OsmoGSM.GSM48CCAlerting new.
         self nextPutSapi: msg.
     ]
 

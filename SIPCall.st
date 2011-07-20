@@ -19,7 +19,7 @@
 PackageLoader fileInPackage: 'OsmoSIP'.
 
 Osmo.SIPCall subclass: SIPMTCall [
-    | remoteLeg |
+    | remoteLeg sdp_alert |
     <category: 'sip'> 
     <comment: 'I represent a SIP terminated call. It is called Mobile
     Terminated to stay with the GSM speech.'>
@@ -55,6 +55,15 @@ Osmo.SIPCall subclass: SIPMTCall [
         self terminateRemote.
     ]
 
+    sessionNotification: aNot [
+        "The session has some information. We will use it to tell
+        the other leg of the connection."
+        (aNot code asInteger = 183) ifTrue: [
+            remoteLeg isNil ifFalse: [
+                sdp_alert := aNot sdp.
+                remoteLeg netAlerting]].
+    ]
+
     terminateRemote [
         remoteLeg isNil
             ifFalse: [remoteLeg netTerminate. remoteLeg := nil].
@@ -63,5 +72,10 @@ Osmo.SIPCall subclass: SIPMTCall [
     sdp [
         <category: 'audio'>
         ^ sdp_result
+    ]
+
+    sdpAlert [
+        <category: 'audio'>
+        ^ sdp_alert
     ]
 ] 
