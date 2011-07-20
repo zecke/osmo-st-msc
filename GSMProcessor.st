@@ -417,7 +417,7 @@ hosting various transactions and dispatching to them.'>
         <category: 'audio-connect'>
 
         "TODO: Maybe start a timer but we are guarded here anyway."
-        ass := self class createAssignment: endp multiplex timeslot: endp timeslot.
+        ass := self class createAssignment: endp multiplex timeslot: endp timeslot - 1.
         self nextPutData: (BSSAPManagement initWith: ass).
     ]
 
