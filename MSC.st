@@ -16,10 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 "
 
-PackageLoader fileInPackage: 'OsmoMGCP'.
+PackageLoader
+    fileInPackage: 'OsmoMGCP';
+    fileInPackage: 'OsmoSIP'.
 
 Object subclass: MSCConfig [
-    | ip port mgcp sip |
+    | ip port mgcp sip_ip sip_port |
     <category: 'MSC-IP'>
     <comment: 'I contain a very simple MSC config for IP based BSCs'>
 
@@ -55,12 +57,22 @@ Object subclass: MSCConfig [
 
     sipIP: aIP [
         <category: 'config'>
-        sip := aIP
+        sip_ip := aIP
     ]
 
     sipIP [
         <category: 'accessing'>
-        ^ sip ifNil: [ip]
+        ^ sip_ip ifNil: [ip]
+    ]
+
+    sipPort: aPort [
+        <category: 'config'>
+        sip_port := aPort
+    ]
+
+    sipPort [
+        <category: 'accessing'>
+        ^ sip_port ifNil: [5061]
     ]
 ]
 
@@ -144,7 +156,7 @@ Object subclass: MSCBSCConnectionHandler [
 ]
 
 Object subclass: MSCApplication [
-    | hlr vlr config bscListener bscConfig bscConHandler mgcp |
+    | hlr vlr config bscListener bscConfig bscConHandler mgcp sip |
     <comment: 'I am a MSC as I have the VLR/HLR and other instances'>
 
     hlr [ ^ hlr ifNil: [HLRLocalCollection new]]
@@ -160,6 +172,29 @@ Object subclass: MSCApplication [
             mgcp := (Osmo.MGCPCallAgent startOn: config bscIP)
                 start;
                 yourself]
+    ]
+
+    sipGateway [
+        <category: 'SIP-Audio'>
+        ^ sip ifNil: [ | transport |
+            transport := Osmo.SIPUdpTransport
+                            startOn: self config sipIP port: self config sipPort.
+            sip := Osmo.SIPUserAgent createOn: transport.
+            transport start.
+            sip]
+    ]
+
+    selectAudioRoute: aCon plan: aPlan leg: aLeg [
+        | call |
+        "TODO: Very simple and hardcoded rule"
+        ^ (SIPMTCall
+            fromUser: 'sip:1000@osmocom.org'
+            host: '192.168.0.106'
+            port: 5060
+            to: 'sip:1000@192.168.0.106'
+            on: self sipGateway)
+            remoteLeg: aLeg;
+            yourself
     ]
 
     serveBSC [
@@ -178,13 +213,17 @@ Object subclass: MSCApplication [
 
         msc := MSCApplication new.
         msc config
-            bscIP: '127.0.0.1';
-            bscPort: 5000.
+            bscIP: '0.0.0.0';
+            bscPort: 5000;
+            sipIP: '192.168.0.101'.
         msc bscConfig
             addBSC: '127.0.0.1' withName: 'test' andLac: 4711.
 
         "Make sure MGCP is running"
         msc mgcpCallAgent.
+
+        "Make sure we handle SIP"
+        msc sipGateway.
 
         msc logNotice: 'Serving BSCs now' area: #msc.
         [msc serveBSC. 'MSC has exited' printNl] fork.

@@ -379,6 +379,11 @@ hosting various transactions and dispatching to them.'>
         ^ conManager msc mgcpCallAgent
     ]
 
+    selectAudioRoute: aPlan leg: aLeg [
+        ^ conManager msc
+            selectAudioRoute: self plan: aPlan leg: aLeg
+    ]
+
     releaseAudio [
         "I try to release things right now."
         <category: 'audio'>
@@ -560,6 +565,11 @@ hosting various transactions and dispatching to them.'>
         endp free.
         endp := nil.
         connId := nil.
+    ]
+
+    sdpFile [
+        <category: 'audio-sdp'>
+        ^ endp sdp
     ]
 
     sendDLCX [

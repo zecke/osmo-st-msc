@@ -64,7 +64,7 @@ OsmoGSM.GSM48CCSetup extend [
 ]
 
 GSMTransaction subclass: GSMMOCall [
-    | state timeout wait_for_ass |
+    | state wait_for_ass remoteLeg |
     <comment: 'I handle Mobile-Originated calls as of 5.2.1 of GSM 04.08'>
 
     GSMMOCall class >> stateNull        [ <category: 'states'> ^ #null ]
@@ -91,16 +91,26 @@ GSMTransaction subclass: GSMMOCall [
     netAlerting [
         <category: 'external'>
         "I am called by the other side of the call"
+
+        "TODO"
     ]
 
     netConnect [
         <category: 'external'>
-        "I am called by the other side of the call"
+        "I am called by the other side of the call. I will need to get
+         the SDP file of this side to send a MGCP message down the stream."
+
+        "TODO"
     ]
 
-    netDisconnect [
+    netTerminate [
         <category: 'external'>
-        "I am called by the other side of the call"
+        "The other side of the call has terminated, let
+        us do the clean up."
+        remoteLeg := nil.
+
+        state := self class stateDisconnInd.
+        self sendDisconnect: #(16rE1 16r90)
     ]
 
     moConnectAck: aMsg [
@@ -109,11 +119,18 @@ GSMTransaction subclass: GSMMOCall [
 
     moDisconnect: aMsg [
         <category: 'mo-message'>
+        state := self class stateDisconnInd.
         self sendRelease: #(16rE1 16r90)
     ]
 
     moRelease: aMsg [
         <category: 'mo-message'>
+        state = self class stateDisconnInd ifFalse: [
+            self logError: 'GSMMOCall(srcref:%1) release in state %2'
+                % {con srcRef. self state} area: #bsc.
+        ].
+
+        self releaseComplete.
     ]
 
     moReleaseCompl: aMsg [
@@ -165,6 +182,15 @@ GSMTransaction subclass: GSMMOCall [
         self nextPutSapi: msg.
     ]
 
+    sendDisconnect: aCause [
+        | msg |
+        <category: 'gsm-routines'>
+
+        msg := OsmoGSM.GSM48CCDisconnect new.
+        msg cause data: aCause.
+        self nextPutSapi: msg.
+    ]
+
     releaseComplete [
         <category: 'transaction'>
 
@@ -176,6 +202,16 @@ GSMTransaction subclass: GSMMOCall [
 
     start: aCCMessage [
         <category: 'transaction'>
+
+        "select route for this call, or release the call"
+        remoteLeg := con selectAudioRoute: aCCMessage calledOrDefault leg: self.
+        remoteLeg isNil ifTrue: [
+            self logError:
+                'GSMMOCall(srcref:%1) failed to select audio route.'
+                    % {con srcRef} area: #bsc.
+            self releaseComplete.
+            ^ self
+        ].
 
         "Failed to allocate an endpoint"
         con allocateEndpoint isNil ifTrue: [
@@ -189,27 +225,24 @@ GSMTransaction subclass: GSMMOCall [
         self sendProceeding.
 
         con sendAssignment.
-
-        timeout := Osmo.TimerScheduler instance scheduleInSeconds: 10 block: [
-            "hack to release things immediately"
-            con conManager critical: [con critical: [con removeTransaction: self]].
-        ]
     ]
 
     cancel [
-        timeout ifNotNil: [timeout cancel].
+        remoteLeg ifNotNil: [remoteLeg netTerminate].
         ^ super cancel
     ]
 
     assignmentFailure [
         "The assignment failed, let's see if it could be for us"
         wait_for_ass ifTrue: [
+            remoteLeg := nil.
             self releaseComplete.
         ]
     ]
 
     assignmentSuccess [
-
+        wait_for_ass := false.
+        remoteLeg createCall: con sdpFile.
     ]
 ]
 

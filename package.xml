@@ -14,6 +14,7 @@
     <filein>GSMMOCall.st</filein>
     <filein>BSCIPAConnection.st</filein>
     <filein>MSC.st</filein>
+    <filein>SIPCall.st</filein>
 
     <test>
         <sunit>OsmoMSC.HLRTest</sunit>

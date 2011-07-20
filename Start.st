@@ -8,7 +8,8 @@ Eval [
         fileIn: 'GSMProcessor.st';
         fileIn: 'GSMMOCall.st';
         fileIn: 'BSCIPAConnection.st';
-        fileIn: 'MSC.st'.
+        fileIn: 'MSC.st';
+        fileIn: 'SIPCall.st'.
 
 "
 "
