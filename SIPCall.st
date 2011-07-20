@@ -40,20 +40,17 @@ Osmo.SIPCall subclass: SIPMTCall [
 
     sessionNew [
         "We now have connected call, tell the other side."
-        'Session NEW' printNl.
         remoteLeg isNil
             ifFalse:  [remoteLeg netConnect]
             ifTrue: [self terminate].
     ]
 
     sessionFailed [
-        'Session Failed' printNl.
         "We have failed to connect things, tell the other side."
         self terminateRemote.
     ]
 
     sessionEnd [
-        'Session END' printNl.
         "The session is now disconnected, tell the other side."
         self terminateRemote.
     ]
