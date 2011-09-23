@@ -185,13 +185,22 @@ Object subclass: MSCApplication [
     ]
 
     selectAudioRoute: aCon plan: aPlan leg: aLeg [
-        | call |
+        | nr |
         "TODO: Very simple and hardcoded rule"
+        nr := aPlan number.
+
+        "No number, let us return"
+        nr isEmpty ifTrue: [^nil].
+
+        "No special number"
+        nr first = $* ifFalse: [^nil].
+
+
         ^ (SIPMTCall
-            fromUser: 'sip:1000@osmocom.org'
-            host: '192.168.0.106'
+            fromUser: 'sip:1000@sip.zecke.osmocom.org'
+            host: '127.0.0.1'
             port: 5060
-            to: 'sip:1000@192.168.0.106'
+            to: 'sip:1%1@127.0.0.1' % {nr allButFirst}
             on: self sipGateway)
             remoteLeg: aLeg;
             yourself
