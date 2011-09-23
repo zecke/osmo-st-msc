@@ -125,7 +125,7 @@ GSMTransaction subclass: GSMMOCall [
 
     moConnectAck: aMsg [
         <category: 'mo-message'>
-        (state = self class stateConnectReq) ifTrue: [
+        (state = self class stateConnectInd) ifTrue: [
             self logNotice: 'GSMMOCall(srcref:%1) call is connected.'
                 % {con srcRef} area: #bsc.
             state := self class stateActive.
