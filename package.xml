@@ -23,6 +23,6 @@
         <sunit>OsmoMSC.BSCListenerTest</sunit>
         <sunit>OsmoMSC.MSCBSCConnectionHandlerTest</sunit>
         <sunit>OsmoMSC.BSCIPAConnectionTest</sunit>
-        <filein>Test.st</filein>
+        <filein>tests/Test.st</filein>
     </test>
 </package>
