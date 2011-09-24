@@ -5,16 +5,16 @@
     <prereq>OsmoNetwork</prereq>
     <prereq>OsmoGSM</prereq>
 
-    <filein>Logging.st</filein>
-    <filein>VLR.st</filein>
-    <filein>HLR.st</filein>
-    <filein>BSCConfig.st</filein>
-    <filein>BSCListener.st</filein>
-    <filein>GSMProcessor.st</filein>
-    <filein>GSMMOCall.st</filein>
-    <filein>BSCIPAConnection.st</filein>
-    <filein>MSC.st</filein>
-    <filein>SIPCall.st</filein>
+    <filein>src/Logging.st</filein>
+    <filein>src/VLR.st</filein>
+    <filein>src/HLR.st</filein>
+    <filein>src/BSCConfig.st</filein>
+    <filein>src/BSCListener.st</filein>
+    <filein>src/GSMProcessor.st</filein>
+    <filein>src/GSMMOCall.st</filein>
+    <filein>src/BSCIPAConnection.st</filein>
+    <filein>src/MSC.st</filein>
+    <filein>src/SIPCall.st</filein>
 
     <test>
         <sunit>OsmoMSC.HLRTest</sunit>

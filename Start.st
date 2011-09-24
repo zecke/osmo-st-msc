@@ -1,15 +1,15 @@
 Eval [
     FileStream
-        fileIn: 'Logging.st';
-        fileIn: 'VLR.st';
-        fileIn: 'HLR.st';
-        fileIn: 'BSCConfig.st';
-        fileIn: 'BSCListener.st';
-        fileIn: 'GSMProcessor.st';
-        fileIn: 'GSMMOCall.st';
-        fileIn: 'BSCIPAConnection.st';
-        fileIn: 'MSC.st';
-        fileIn: 'SIPCall.st'.
+        fileIn: 'src/Logging.st';
+        fileIn: 'src/VLR.st';
+        fileIn: 'src/HLR.st';
+        fileIn: 'src/BSCConfig.st';
+        fileIn: 'src/BSCListener.st';
+        fileIn: 'src/GSMProcessor.st';
+        fileIn: 'src/GSMMOCall.st';
+        fileIn: 'src/BSCIPAConnection.st';
+        fileIn: 'src/MSC.st';
+        fileIn: 'src/SIPCall.st'.
 
 "
 "
