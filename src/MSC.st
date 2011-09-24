@@ -224,7 +224,7 @@ Object subclass: MSCApplication [
         msc config
             bscIP: '0.0.0.0';
             bscPort: 5000;
-            sipIP: '192.168.0.101'.
+            sipIP: '127.0.0.1'.
         msc bscConfig
             addBSC: '127.0.0.1' withName: 'test' andLac: 4711.
 
