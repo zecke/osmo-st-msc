@@ -21,7 +21,8 @@ This is the interface to the VLR
 
 Object subclass: VLRSubscriber [
     |imsi tmsi msisdn lac|
-    <category: 'osmo-msc'>
+
+    <category: 'OsmoMSC-VLR'>
     <comment: 'I am one subscriber in the VLR'>
     
 
@@ -32,7 +33,7 @@ Object subclass: VLRSubscriber [
 ]
 
 Object subclass: VLR [
-    <category: 'osmo-msc'>
+    <category: 'OsmoMSC-VLR'>
     <comment: 'I hold the active subscribers'>
 
     activeSubscribers [
@@ -73,6 +74,7 @@ Object subclass: VLR [
 ]
 
 Object subclass: HLRResolver [
+    <category: 'OsmoMSC-HLR'>
     insertSubscriber: aIMSI [
         ^ self subclassResponsibility
     ]
@@ -80,6 +82,8 @@ Object subclass: HLRResolver [
 
 VLR subclass: VLRLocalCollection [
     | subs resolver |
+
+    <category: 'OsmoMSC-VLR'>
 
     VLRLocalCollection class >> initWith: aResolver [
         ^ self new

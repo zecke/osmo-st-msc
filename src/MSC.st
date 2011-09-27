@@ -22,7 +22,8 @@ PackageLoader
 
 Object subclass: MSCConfig [
     | ip port mgcp sip_ip sip_port |
-    <category: 'MSC-IP'>
+
+    <category: 'OsmoMSC-MSC'>
     <comment: 'I contain a very simple MSC config for IP based BSCs'>
 
     bscIP: aIP [
@@ -79,6 +80,7 @@ Object subclass: MSCConfig [
 Object subclass: MSCBSCConnectionHandler [
     | msc connections |
 
+    <category: 'OsmoMSC-MSC'>
     <comment: 'I take incoming connections, find a handler for them and
     will register them. I will be passed to the BSCListener'>
 
@@ -157,6 +159,8 @@ Object subclass: MSCBSCConnectionHandler [
 
 Object subclass: MSCApplication [
     | hlr vlr config bscListener bscConfig bscConHandler mgcp sip |
+
+    <category: 'OsmoMSC-MSC'>
     <comment: 'I am a MSC as I have the VLR/HLR and other instances'>
 
     hlr [ ^ hlr ifNil: [HLRLocalCollection new]]

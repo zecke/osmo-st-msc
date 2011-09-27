@@ -22,7 +22,7 @@ I am helping to get things started on the first image resume
 PackageLoader fileInPackage: #OsmoMSC.
 
 Object subclass: Loader [
-    <category: 'MSC-Loader'>
+    <category: 'OsmoMSC-Loader'>
     <comment: 'I wait for the image to resume and then I start the
     MSC example application and put it into the OsmoMSC namespace.'>
 

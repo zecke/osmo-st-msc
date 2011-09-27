@@ -20,8 +20,9 @@ PackageLoader fileInPackage: #Sockets.
 
 Object subclass: BSCConfigItem [
     | peer token name lac connected |
-    <category: 'MSC-BSC'>
-    <comment: 'I hold the configuration for one BJSC Item. It consists of the
+
+    <category: 'OsmoMSC-BSC'>
+    <comment: 'I hold the configuration for one BSC Item. It consists of the
 peer address, the lac, if it is connected'>
 
     BSCConfigItem class >> initWith: aPeer name: aName [
@@ -63,7 +64,8 @@ peer address, the lac, if it is connected'>
 
 Object subclass: BSCConfig [
     | bscList |
-    <category: 'MSC-BSC'>
+
+    <category: 'OsmoMSC-BSC'>
     <comment: 'I know the BSCs that can connect to me'>
 
     removeBSC: aPeer [

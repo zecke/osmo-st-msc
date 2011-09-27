@@ -22,6 +22,8 @@ PackageLoader
 
 OsmoGSM.SCCPHandler subclass: BSCSCCPHandler [
     | bsc msc |
+
+    <category: 'OsmoMSC-BSC'>
     <comment: 'I handle SCCP for the MSC/BSC connection'>
 
     BSCSCCPHandler class >> initWith: aBSC msc: aMSC [
@@ -59,6 +61,8 @@ OsmoGSM.SCCPHandler subclass: BSCSCCPHandler [
 Object subclass: BSCConnection [
     | config msc trunk |
 
+    <category: 'OsmoMSC-BSC'>
+
     BSCConnection class >> createOn: aConfig msc: aMsc [
         <category: 'creation'>
         ^ self new
@@ -95,6 +99,8 @@ Object subclass: BSCConnection [
 
 BSCConnection subclass: BSCIPAConnection [
     | socket demuxer writeQueue muxer dispatcher sccp tx terminated ipa |
+
+    <category: 'OsmoMSC-BSC'>
     <comment: 'I represent one Connection to a BSC and use the IPA
      protocol to exchange messages. I will be executed from within
      a thread and can do a blocking read from in here.'>

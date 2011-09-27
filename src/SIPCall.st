@@ -20,7 +20,8 @@ PackageLoader fileInPackage: 'OsmoSIP'.
 
 Osmo.SIPCall subclass: SIPMTCall [
     | remoteLeg sdp_alert |
-    <category: 'sip'> 
+
+    <category: 'OsmoMSC-SIP'>
     <comment: 'I represent a SIP terminated call. It is called Mobile
     Terminated to stay with the GSM speech.'>
 

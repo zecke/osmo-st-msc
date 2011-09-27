@@ -19,7 +19,8 @@
 PackageLoader fileInPackage: 'OsmoLogging'.
 
 Osmo.LogArea subclass: LogAreaBSC [
-    <category: 'osmo-msc-logging'>
+    <category: 'OsmoMSC-Logging'>
+
     LogAreaBSC class >> areaName [ ^ #bsc ]
     LogAreaBSC class >> areaDescription [ ^ 'BSC Connectivty' ]
     LogAreaBSC class >> default [
@@ -31,7 +32,8 @@ Osmo.LogArea subclass: LogAreaBSC [
 ]
 
 Osmo.LogArea subclass: LogAreaHLR [
-    <category: 'osmo-msc-logging'>
+    <category: 'OsmoMSC-Logging'>
+
     LogAreaHLR class >> areaName [ ^ #hlr ]
     LogAreaHLR class >> areaDescription [ ^ 'HLR work' ]
     LogAreaHLR class >> default [
@@ -41,7 +43,8 @@ Osmo.LogArea subclass: LogAreaHLR [
 ]
 
 Osmo.LogArea subclass: LogAreaVLR [
-    <category: 'osmo-msc-logging'>
+    <category: 'OsmoMSC-Logging'>
+
     LogAreaVLR class >> areaName [ ^ #vlr ]
     LogAreaVLR class >> areaDescription [ ^ 'VLR work' ]
     LogAreaVLR class >> default [
@@ -51,7 +54,8 @@ Osmo.LogArea subclass: LogAreaVLR [
 ]
 
 Osmo.LogArea subclass: LogAreaMSC [
-    <category: 'osmo-msc-logging'>
+    <category: 'OsmoMSC-Logging'>
+
     LogAreaMSC class >> areaName [ ^ #msc ]
     LogAreaMSC class >> areaDescription [ ^ 'MSC work' ]
     LogAreaMSC class >> default [

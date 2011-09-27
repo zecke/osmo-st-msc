@@ -22,7 +22,8 @@ data that will be used inside the HLR.
 
 Object subclass: HLRSubscriber [
     |imsi msisdn vlrnumber auKey name |
-    <category: 'osmo-msc'>
+
+    <category: 'OsmoMSC-HLR'>
     <comment: 'I am one subscriber in the HLR'>
 
     imsi      [ <category: 'accessing'> ^ imsi      ]
@@ -33,7 +34,7 @@ Object subclass: HLRSubscriber [
 ]
 
 Object subclass: HLR [
-    <category: 'osmo-msc'>
+    <category: 'OsmoMSC-HLR'>
     <comment: 'I am a HLR and I can find subscribers'>
 
     findSubscriberByIMSI: aIMSI [
@@ -48,7 +49,8 @@ Object subclass: HLR [
 
 HLR subclass: HLRLocalCollection [
     | subs |
-    <category: 'osmo-msc-simple'>
+
+    <category: 'OsmoMSC-HLR'>
     <comment: 'I am a very simple local HLR'>
 
     findSubscriberByIMSI: aIMSI [

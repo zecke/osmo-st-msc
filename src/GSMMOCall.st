@@ -18,36 +18,42 @@
 
 OsmoGSM.GSM48MSG extend [
     dispatchMoCall: aCon [
+        <category: '*-OsmoMSC-GSM'>
         aCon moUnknown: self.
     ]
 ]
 
 OsmoGSM.GSM48CCConnectAck extend [
     dispatchMoCall: aCon [
+        <category: '*-OsmoMSC-GSM'>
         aCon moConnectAck: self.
     ]
 ]
 
 OsmoGSM.GSM48CCDisconnect extend [
     dispatchMoCall: aCon [
+        <category: '*-OsmoMSC-GSM'>
         aCon moDisconnect: self.
     ]
 ]
 
 OsmoGSM.GSM48CCRelease extend [
     dispatchMoCall: aCon [
+        <category: '*-OsmoMSC-GSM'>
         aCon moRelease: self.
     ]
 ]
 
 OsmoGSM.GSM48CCReleaseCompl extend [
     dispatchMoCall: aCon [
+        <category: '*-OsmoMSC-GSM'>
         aCon moReleaseCompl: self.
     ]
 ]
 
 OsmoGSM.GSM48CCStatus extend [
     dispatchMoCall: aCon [
+        <category: '*-OsmoMSC-GSM'>
         aCon moStatus: self.
     ]
 ]
@@ -55,6 +61,7 @@ OsmoGSM.GSM48CCStatus extend [
 OsmoGSM.GSM48CCSetup extend [
     openTransactionOn: aCon sapi: aSapi [
         | tran |
+        <category: '*-OsmoMSC-GSM'>
         tran := (GSMMOCall on: aSapi with: self ti)
                     con: aCon;
                     yourself.
@@ -65,6 +72,8 @@ OsmoGSM.GSM48CCSetup extend [
 
 GSMTransaction subclass: GSMMOCall [
     | state wait_for_ass remoteLeg |
+
+    <category: 'OsmoMSC-GSM'>
     <comment: 'I handle Mobile-Originated calls as of 5.2.1 of GSM 04.08. I should
     represent the states found in Figure 5.1b/3GPP TS 04.08: Overview call controll
     protocol/Network side. Right now the set of states is incomplete and is mixed

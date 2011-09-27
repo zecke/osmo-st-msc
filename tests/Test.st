@@ -19,6 +19,8 @@
 PackageLoader fileInPackage: 'SUnit'.
 
 TestCase subclass: HLRTest [
+    <category: 'OsmoMSC-Tests'>
+
     testHLRFind [
         | hlr sub |
         hlr := HLRLocalCollection new.
@@ -35,10 +37,14 @@ TestCase subclass: HLRTest [
 ]
 
 HLRResolver subclass: HLRDummyResolver [
+    <category: 'OsmoMSC-Tests'>
+
     insertSubscriber: aIMSI [ ^ true ]
 ]
 
 TestCase subclass: VLRTest [
+    <category: 'OsmoMSC-Tests'>
+
     testVLRFind [
         | vlr sub1 sub2 |
         vlr := VLRLocalCollection initWith: HLRDummyResolver new.
@@ -58,6 +64,7 @@ TestCase subclass: VLRTest [
 ]
 
 TestCase subclass: BSCConfigTest [
+    <category: 'OsmoMSC-Tests'>
     <comment: 'I will test the BSCConfig'>
 
     testConfigItem [
@@ -107,6 +114,7 @@ TestCase subclass: BSCConfigTest [
 ]
 
 TestCase subclass: BSCListenerTest [
+    <category: 'OsmoMSC-Tests'>
     <comment: 'Test some basic socket functionality'>
 
     testListenAndStop [
@@ -136,6 +144,7 @@ TestCase subclass: BSCListenerTest [
 ]
 
 TestCase subclass: MSCBSCConnectionHandlerTest [
+    <category: 'OsmoMSC-Tests'>
     <comment: 'I should test the feature that each config can only
     be connected once but that is not done yet. It requires some work
     on socket code. TODO!!!'>
@@ -155,6 +164,7 @@ TestCase subclass: MSCBSCConnectionHandlerTest [
 ]
 
 TestCase subclass: BSCIPAConnectionTest [
+    <category: 'OsmoMSC-Tests'>
     <comment: 'I just do some simple smoke testing here'>
 
     testSmoke [

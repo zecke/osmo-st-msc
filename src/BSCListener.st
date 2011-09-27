@@ -21,6 +21,7 @@ PackageLoader fileInPackage: 'Sockets'.
 Object subclass: BSCListener [
     | ip port socket handler |
 
+    <category: 'OsmoMSC-BSC'>
     <comment: 'I listen for incoming BSC connections and will
     authenticate them based on a definable criteria. Right now
     this is based on IP address'>

@@ -20,16 +20,19 @@ PackageLoader fileInPackage: 'OsmoGSM'.
 
 OsmoGSM.BSSAPMessage extend [
     dispatchTrans: aCon [
+        <category: '*-OsmoMSC-GSM'>
         aCon bssapUnknownData: self
     ]
 ]
 
 OsmoGSM.BSSAPManagement extend [
     dispatchTrans: aCon [
+        <category: '*-OsmoMSC-GSM'>
         self dispatchMAP: aCon.
     ]
 
     dispatchMAP: aCon [
+        <category: '*-OsmoMSC-GSM'>
         (Dictionary from: {
             OsmoGSM.GSM0808Helper msgComplL3   -> #mapLayer3:.
             OsmoGSM.GSM0808Helper msgClearReq  -> #mapClearReq:.
@@ -47,18 +50,22 @@ OsmoGSM.BSSAPManagement extend [
 
 OsmoGSM.BSSAPDTAP extend [
     dispatchTrans: aCon [
+        <category: '*-OsmoMSC-GSM'>
         aCon dispatchDTAP: self.
     ]
 ]
 
 OsmoGSM.GSM48MSG extend [
     openTransactionOn: aCon sapi: aSapi [
+        <category: '*-OsmoMSC-GSM'>
         self logError: 'Can not open transaction for %1' % {self class} area: #bsc.
     ]
 ]
 
 Object subclass: GSMTransaction [
     | sapi ti con |
+
+    <category: 'OsmoMSC-GSM'>
     <comment: 'I am the base for everything that goes on in a
 GSM transaction on a given SAPI'>
 
@@ -119,12 +126,14 @@ GSM transaction on a given SAPI'>
 ]
 
 GSMTransaction subclass: GSMLURequest [
+    <category: 'OsmoMSC-GSM'>
     <comment: 'I handle a Location Updating Request'>
 ]
 
 OsmoGSM.SCCPConnectionBase subclass: GSMProcessor [
     | transactions state endp connId mgcp_trans |
 
+    <category: 'OsmoMSC-GSM'>
     <comment: 'I am driving a SCCP Connection. This consists of being
 hosting various transactions and dispatching to them.'>
     <import: OsmoGSM>
