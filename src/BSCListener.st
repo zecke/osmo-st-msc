@@ -45,22 +45,26 @@ Object subclass: BSCListener [
 
     serve [
 	[true] whileTrue: [
-            [ | con |
-                socket waitForConnection.
-                con := socket accept.
-                con ifNil: [
-                    self logNotice: 'BSC-Socket: Connection failed. Will return.' area: #bsc.
-                    ^ false
-                ].
-
-                handler isNil
-                    ifTrue: [con close]
-                    ifFalse:[handler newConnection: con].
-            ] on: SystemExceptions.FileError do: [:each |
-                self logNotice: 'BSC-Socket: FileError on connection handling.' area: #bsc.
-                ^ false.
-            ].
+            self handleOneConnection.
         ]
+    ]
+
+    handleOneConnection [
+        [ | con |
+            socket waitForConnection.
+            con := socket accept.
+            con ifNil: [
+                self logNotice: 'BSC-Socket: Connection failed. Will return.' area: #bsc.
+                ^ false
+            ].
+
+            handler isNil
+                ifTrue: [con close]
+                ifFalse:[handler newConnection: con].
+        ] on: SystemExceptions.FileError do: [:each |
+            self logNotice: 'BSC-Socket: FileError on connection handling.' area: #bsc.
+            ^ false.
+        ].
     ]
 
     start [
