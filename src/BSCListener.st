@@ -59,7 +59,9 @@ Object subclass: BSCListener [
             ].
 
             handler isNil
-                ifTrue: [con close]
+                ifTrue: [
+                    self logNotice: 'BSC-Socket: Closing connection due lack of handler.' area: #bsc.
+                    con close]
                 ifFalse:[handler newConnection: con].
         ] on: SystemExceptions.FileError do: [:each |
             self logNotice: 'BSC-Socket: FileError on connection handling.' area: #bsc.
