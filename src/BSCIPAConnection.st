@@ -141,15 +141,22 @@ BSCConnection subclass: BSCIPAConnection [
 
         "Drain the send queue in a new process"
         tx := [
-            [[
-                | msg |
-                msg := writeQueue next.
-                socket nextPutAllFlush: msg.
+            [
+            [
+                self runTxQueueOnce
             ] repeat.
             ] ensure: [
                 self logNotice: 'BSC TX queue lac: %1 finished' % {self lac} area: #bsc]
         ] fork.
 
+    ]
+
+    runTxQueueOnce [
+        | msg |
+        <category: 'private'>
+
+        msg := writeQueue next.
+        socket nextPutAllFlush: msg.
     ]
 
     send: aMsg with: aType [
