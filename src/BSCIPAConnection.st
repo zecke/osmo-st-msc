@@ -20,44 +20,6 @@ PackageLoader
     fileInPackage: 'OsmoMGCP';
     fileInPackage: 'OsmoNetwork'.
 
-OsmoGSM.SCCPHandler subclass: BSCSCCPHandler [
-    | bsc msc |
-
-    <category: 'OsmoMSC-BSC'>
-    <comment: 'I handle SCCP for the MSC/BSC connection'>
-
-    BSCSCCPHandler class >> initWith: aBSC msc: aMSC [
-        ^ self new
-            instVarNamed: #bsc put: aBSC;
-            instVarNamed: #msc put: aMSC;
-            yourself
-    ]
-
-    connectionSpecies [
-        ^ GSMProcessor
-    ]
-
-    bsc [
-        <category: 'accessing'>
-        ^ bsc
-    ]
-
-    msc [
-        <category: 'accessing'>
-        ^ msc
-    ]
-
-    handleMsg: aMsg [
-        ^ super handleMsg: aMsg.
-    ]
-
-    newConnection: aConnection [
-        self logNotice: 'New incoming SCCP connection %1 on the BSC %2'
-             % {aConnection srcRef. bsc lac} area: #bsc.
-        ^ super newConnection: aConnection.
-    ]
-]
-
 Object subclass: BSCConnection [
     | config msc trunk |
 
