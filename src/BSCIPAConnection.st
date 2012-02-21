@@ -17,8 +17,26 @@
 "
 
 PackageLoader
+    fileInPackage: 'OsmoCore';
     fileInPackage: 'OsmoMGCP';
     fileInPackage: 'OsmoNetwork'.
+
+Osmo.IPAProtoHandler subclass: BSCIPAProtoHandler [
+    | bsc |
+    <category: 'OsmoMSC-BSC'>
+
+    BSCIPAProtoHandler class >> initWith: aBSC [
+        <category: 'creation'>
+        ^ self new
+            instVarNamed: #bsc put: aBSC;
+            yourself
+    ]
+
+    handlePong: aMsg [
+        <category: 'pong'>
+        bsc receivedPong.
+    ]
+]
 
 Object subclass: BSCConnection [
     | config msc trunk |
@@ -60,7 +78,8 @@ Object subclass: BSCConnection [
 ]
 
 BSCConnection subclass: BSCIPAConnection [
-    | socket demuxer writeQueue muxer dispatcher sccp tx terminated ipa |
+    | socket demuxer writeQueue muxer dispatcher sccp tx terminated
+      ipa ping_timeout pong_timeout |
 
     <category: 'OsmoMSC-BSC'>
     <comment: 'I represent one Connection to a BSC and use the IPA
@@ -92,7 +111,7 @@ BSCConnection subclass: BSCIPAConnection [
         dispatcher := Osmo.IPADispatcher new.
         dispatcher initialize.
 
-        ipa := Osmo.IPAProtoHandler new.
+        ipa := BSCIPAProtoHandler initWith: self.
         ipa registerOn: dispatcher.
         ipa muxer: muxer.
         ipa token: 'abc'.
@@ -103,6 +122,7 @@ BSCConnection subclass: BSCIPAConnection [
 
         "Drain the send queue in a new process"
         tx := [
+            self sendPing.
             [
             [
                 self runTxQueueOnce
@@ -152,7 +172,33 @@ BSCConnection subclass: BSCIPAConnection [
         "Bring down everything that happens for this BSC. This is a reset"
         terminated := true.
         self logNotice: 'BSC lac: %1 terminating.' % {self lac} area: #bsc.
+        pong_timeout isNil ifFalse: [pong_timeout cancel].
         self class terminate: tx.
         OsmoDispatcher dispatchBlock: [sccp linkSetFailed].
+    ]
+
+    sendPing [
+        <category: 'ping-pong'>
+        "I send a ping and start a timer..."
+        self
+            send: (ByteArray with: Osmo.IPAConstants msgPing)
+            with: Osmo.IPAConstants protocolIPA.
+        self logDebug: 'BSC lac: %1 sent ping waiting now.' % {self lac} area: #bsc.
+
+        pong_timeout := (Osmo.TimerScheduler instance)
+            scheduleInSeconds: 5 block: [
+                self logNotice: 'BSC lac: %1 ping timeout.' % {self lac} area: #bsc.
+                socket close].
+    ]
+
+    receivedPong [
+        <category: 'ping-pong'>
+        terminated = true ifTrue: [^false].
+
+        pong_timeout cancel.
+        self logDebug: 'BSC lac: %1 ponged.' % {self lac} area: #bsc.
+        ping_timeout := (Osmo.TimerScheduler instance)
+            scheduleInSeconds: 30 block: [
+                self sendPing].
     ]
 ]
