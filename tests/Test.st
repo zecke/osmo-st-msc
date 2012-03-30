@@ -27,8 +27,8 @@ TestCase subclass: HLRTest [
         hlr addSubscriber: '123456'.
         hlr addSubscriber: '345677'.
 
-        self assert: (hlr findSubscriberByIMSI: '123456') isNil not.
-        self assert: (hlr findSubscriberByIMSI: '345677') isNil not.
+        self deny: (hlr findSubscriberByIMSI: '123456') isNil.
+        self deny: (hlr findSubscriberByIMSI: '345677') isNil.
         self assert: (hlr findSubscriberByIMSI: '432432') isNil.
 
         sub := hlr findSubscriberByIMSI: '123456'.
@@ -76,12 +76,12 @@ TestCase subclass: BSCConfigTest [
         self assert: item1 name = 'test1'.
         self assert: item1 peer = addr.
         self assert: item1 lac = -1.
-        self assert: item1 connected not.
+        self deny: item1 connected.
 
         self assert: item2 name = 'test2'.
         self assert: item2 peer = addr.
         self assert: item2 lac = -1.
-        self assert: item2 connected not.
+        self deny: item2 connected.
     ]
 
     testConfig [
@@ -124,14 +124,14 @@ TestCase subclass: BSCListenerTest [
         'Will attempt to stop the connection' printNl.
         [(Delay forSeconds: 2) wait. listener stop] fork.
         res := listener serve.
-        self assert: res not.
+        self deny: res.
 
         "Test that it will work again"
         'Will attempt to stop the connection2' printNl.
         listener start.
         [(Delay forSeconds: 2) wait. listener stop] fork.
         res := listener serve.
-        self assert: res not.
+        self deny: res.
     ]
 
     testListenOnDeadSocket [
@@ -139,7 +139,7 @@ TestCase subclass: BSCListenerTest [
         listener := BSCListener initWith: '127.0.0.1' port: 9245 handler: nil.
         listener stop.
         res := listener serve.
-        self assert: res not.
+        self deny: res.
     ]
 ]
 
