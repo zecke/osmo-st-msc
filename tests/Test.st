@@ -170,7 +170,7 @@ TestCase subclass: BSCIPAConnectionTest [
     testSmoke [
         | ipa |
         ipa := BSCIPAConnection
-                createOn: 'hi'
+                createOn: 'hi' writeStream
                 withConfig: (BSCConfigItem initWith: '0.0.0.0' name: 'foo')
                 msc: nil.
     ]

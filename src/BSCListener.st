@@ -44,9 +44,11 @@ Object subclass: BSCListener [
     ]
 
     serve [
-	[true] whileTrue: [
+	[socket isOpen] whileTrue: [
             self handleOneConnection.
-        ]
+        ].
+
+        ^ false
     ]
 
     handleOneConnection [
