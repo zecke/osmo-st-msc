@@ -8,6 +8,7 @@ Eval [
         fileIn: 'src/BSCSCCPHandler.st';
         fileIn: 'src/GSMProcessor.st';
         fileIn: 'src/GSMMOCall.st';
+        fileIn: 'src/GSMLURequest.st';
         fileIn: 'src/BSCIPAConnection.st';
         fileIn: 'src/MSC.st';
         fileIn: 'src/SIPCall.st'.

@@ -125,11 +125,6 @@ GSM transaction on a given SAPI'>
     ]
 ]
 
-GSMTransaction subclass: GSMLURequest [
-    <category: 'OsmoMSC-GSM'>
-    <comment: 'I handle a Location Updating Request'>
-]
-
 OsmoGSM.SCCPConnectionBase subclass: GSMProcessor [
     | transactions state endp connId mgcp_trans |
 
