@@ -389,6 +389,7 @@ hosting various transactions and dispatching to them.'>
     ]
 
     selectAudioRoute: aPlan leg: aLeg [
+        <category: 'call'>
         ^ conManager msc
             selectAudioRoute: self plan: aPlan leg: aLeg
     ]
