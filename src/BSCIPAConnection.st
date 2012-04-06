@@ -54,11 +54,13 @@ Object subclass: BSCConnection [
 
     initialize [
         <category: 'creation'>
-        "I try to initialize the trunk. Right now I force the usage
-        of UDP to the given port and do not support the nat traversal. I
-        also hardcode the kind of audio."
+        "I try to initialize the trunk to the remote BSC. Right now I force
+        the usage of UDP."
         trunk := Osmo.MGCPDSTrunk createWithDest: config peer printString trunkNr: 1.
         (trunk endpointAt: 1) tryBlock.
+
+        "Osmo Extension"
+        config sendOsmoRSIP ifTrue: [self sendOsmoRSIP].
     ]
 
     config [
@@ -74,6 +76,15 @@ Object subclass: BSCConnection [
     trunk [
         <category: 'accessing'>
         ^ trunk
+    ]
+
+    sendOsmoRSIP [
+        <category: 'osmo-extensions'>
+
+        "Send the RSIP in a fire and forget style."
+        (Osmo.MGCPTransaction on: (trunk endpointAt: 2) of: msc mgcpCallAgent)
+          command: Osmo.MGCPOsmoRSIPCommand createRSIP;
+          startSingleShot.
     ]
 ]
 

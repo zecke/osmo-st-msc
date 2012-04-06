@@ -1,5 +1,5 @@
 "
- (C) 2010 by Holger Hans Peter Freyther
+ (C) 2010-2012 by Holger Hans Peter Freyther
  All Rights Reserved
 
  This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 PackageLoader fileInPackage: #Sockets.
 
 Object subclass: BSCConfigItem [
-    | peer token name lac connected |
+    | peer token name lac connected osmoExtension |
 
     <category: 'OsmoMSC-BSC'>
     <comment: 'I hold the configuration for one BSC Item. It consists of the
@@ -60,6 +60,12 @@ peer address, the lac, if it is connected'>
         <category: 'private'>
         connected := aState.
     ]
+
+    sendOsmoRSIP [ <category: 'accessing'> ^ osmoExtension ]
+    sendOsmoRSIP: useExtension [
+        <category: 'private'>
+        osmoExtension := useExtension
+    ]
 ]
 
 Object subclass: BSCConfig [
@@ -78,14 +84,16 @@ Object subclass: BSCConfig [
         self bscList removeAllSuchThat: [:element | element lac = aLac].
     ]
 
-    addBSC: ip withName: aName andLac: aLac [
+    addBSC: ip withName: aName andLac: aLac sendOsmoRSIP: aRSIP [
         | addr bsc |
         <category: 'management'>
         "Make sure that no one with the same IP or LAC registers"
 
         addr := Sockets.SocketAddress byName: ip.
-        bsc := BSCConfigItem initWith: addr name: aName.
-        bsc lac: aLac.
+        bsc := (BSCConfigItem initWith: addr name: aName)
+                lac: aLac;
+                sendOsmoRSIP: aRSIP;
+                yourself.
 
         (self bscList anySatisfy: [:each | each peer = addr ])
             ifTrue: [
