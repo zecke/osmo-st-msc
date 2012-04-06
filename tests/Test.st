@@ -91,16 +91,16 @@ TestCase subclass: BSCConfigTest [
 
         cfg := BSCConfig new.
         self shouldnt:
-            [cfg addBSC: '127.0.0.1' withName: 'abc1' andLac: 2311]
+            [cfg addBSC: '127.0.0.1' withName: 'abc1' andLac: 2311 sendOsmoRSIP: false]
             raise: Exception description: 'Simply adding it'.
         self should:
-            [cfg addBSC: '127.0.0.1' withName: 'abc2' andLac: 1123]
+            [cfg addBSC: '127.0.0.1' withName: 'abc2' andLac: 1123 sendOsmoRSIP: false]
             raise: Exception description: 'Same IP is forbidden'.
         self should:
-            [cfg addBSC: '127.0.0.2' withName: 'abc3' andLac: 2311]
+            [cfg addBSC: '127.0.0.2' withName: 'abc3' andLac: 2311 sendOsmoRSIP: false]
             raise: Exception description: 'Different IP same lac'.
         self shouldnt:
-            [cfg addBSC: '127.0.0.2' withName: 'abc4' andLac: 1123]
+            [cfg addBSC: '127.0.0.2' withName: 'abc4' andLac: 1123 sendOsmoRSIP: false]
             raise: Exception description: 'Different IP, different lac'.
 
         self assert: cfg bscList size = 2 description: 'Two BSCs should be registered'.

@@ -27,7 +27,12 @@ peer address, the lac, if it is connected'>
 
     BSCConfigItem class >> initWith: aPeer name: aName [
         ^ self new
-            peer: aPeer; name: aName; lac: -1; connected: false; yourself
+            peer: aPeer;
+            name: aName;
+            connected: false;
+            sendOsmoRSIP: false;
+            lac: -1;
+            yourself
     ]
 
     BSCConfigItem class >> resolveAddress: aPeer [
