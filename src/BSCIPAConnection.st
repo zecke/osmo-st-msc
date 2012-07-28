@@ -120,7 +120,6 @@ BSCConnection subclass: BSCIPAConnection [
         muxer := Osmo.IPAMuxer initOn: writeQueue.
 
         dispatcher := Osmo.IPADispatcher new.
-        dispatcher initialize.
 
         ipa := BSCIPAProtoHandler initWith: self.
         ipa registerOn: dispatcher.
