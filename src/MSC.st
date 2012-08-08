@@ -107,6 +107,8 @@ Object subclass: MSCBSCConnectionHandler [
 
 
         [
+            Processor activeProcess name: 'MSCBSCConnectionHandler(%1)' % {aConfig lac}.
+
             [[
                 aConfig connected: true.
                 self connections add: bsc.
@@ -215,7 +217,9 @@ Object subclass: MSCApplication [
         self sipGateway.
 
         self logNotice: 'Serving BSCs now' area: #msc.
-        [self serveBSC. 'MSC has exited' printNl] fork.
+        [
+            Processor activeProcess name: 'BSC Listener'.
+            self serveBSC. 'MSC has exited' printNl] fork.
     ]
 
     mgcpCallAgent [

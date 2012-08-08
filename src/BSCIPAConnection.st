@@ -132,6 +132,8 @@ BSCConnection subclass: BSCIPAConnection [
 
         "Drain the send queue in a new process"
         tx := [
+            Processor activeProcess name: 'BTS TX queue(%1)' % {self lac}.
+
             self sendPing.
             [
             [
