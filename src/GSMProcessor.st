@@ -40,6 +40,7 @@ OsmoGSM.BSSAPManagement extend [
             OsmoGSM.GSM0808Helper msgCipherModeCmpl -> #mapCipherModeCompl:.
             OsmoGSM.GSM0808Helper msgAssComplete -> #mapAssComplete:.
             OsmoGSM.GSM0808Helper msgAssFailure -> #mapAssFailure:.
+            OsmoGSM.GSM0808Helper msgCMUpdate -> #mapCMUpdate:.
             }) at: self data type ifPresent: [:sel |
             ^ aCon perform: sel with: self.
         ].
@@ -440,6 +441,10 @@ hosting various transactions and dispatching to them.'>
             self logError: 'GSMProc(srcref:%1) GSM0808 Assignment failed.'
                     % {self srcRef} area: #bsc.
             self assignmentFailure.]]
+    ]
+
+    mapCMUpdate: aData [
+        <category: 'map-classmark'>
     ]
 
     assignmentSuccess [
