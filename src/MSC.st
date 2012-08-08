@@ -163,12 +163,60 @@ Object subclass: MSCApplication [
     <category: 'OsmoMSC-MSC'>
     <comment: 'I am a MSC as I have the VLR/HLR and other instances'>
 
+    MSCApplication class >> new [
+        <category: 'creation'>
+        ^ super new
+            initialize;
+            yourself
+    ]
+
+    initialize [
+        <category: 'creation'>
+        ObjectMemory addDependent: self.
+    ]
+
+    update: aSymbol [
+        <category: 'initialize'>
+
+        "We need to re-initialize the sockets and state"
+        aSymbol = #returnFromSnapshot ifTrue: [
+            self returnedFromSnapshot.
+        ]
+    ]
+
+
     hlr [ ^ hlr ifNil: [HLRLocalCollection new]]
     vlr [ ^ vlr ifNil: [VLRLocalCollection new]]
 
     config [ ^ config ifNil: [config := MSCConfig new]]
     bscConfig [ ^ bscConfig ifNil: [bscConfig := BSCConfig new]]
     bscConHandler [ ^ bscConHandler ifNil: [bscConHandler := MSCBSCConnectionHandler initWith: self]]
+
+    returnedFromSnapshot [
+        <category: 'resume'>
+
+        mgcp isNil ifFalse: [
+            mgcp start
+        ].
+
+        "Stop the UDP processing and create a new transport. We might need
+        to do this in an atomic operation."
+        sip isNil ifFalse: [|old transport|
+            old := sip transport.
+            old stop.
+            transport := self newSipTransport.
+            transport start.
+            sip transport: transport].
+
+        "Make sure MGCP is running"
+        self mgcpCallAgent.
+
+        "Make sure we handle SIP"
+        self sipGateway.
+
+        self logNotice: 'Serving BSCs now' area: #msc.
+        [self serveBSC. 'MSC has exited' printNl] fork.
+    ]
 
     mgcpCallAgent [
         <category: 'MGCP-Audio'>
@@ -178,11 +226,16 @@ Object subclass: MSCApplication [
                 yourself]
     ]
 
+    newSipTransport [
+        <category: 'private'>
+        ^ Osmo.SIPUdpTransport
+              startOn: self config sipIP port: self config sipPort.
+    ]
+
     sipGateway [
         <category: 'SIP-Audio'>
         ^ sip ifNil: [ | transport |
-            transport := Osmo.SIPUdpTransport
-                            startOn: self config sipIP port: self config sipPort.
+            transport := self newSipTransport.
             sip := Osmo.SIPUserAgent createOn: transport.
             transport start.
             sip]
@@ -233,15 +286,7 @@ Object subclass: MSCApplication [
             addBSC: '127.0.0.1' withName: 'test1' andLac: 4711 sendOsmoRSIP: true;
             addBSC: '10.240.240.1' withName: 'test2' andLac: 4712 sendOsmoRSIP: true.
 
-        "Make sure MGCP is running"
-        msc mgcpCallAgent.
-
-        "Make sure we handle SIP"
-        msc sipGateway.
-
-        msc logNotice: 'Serving BSCs now' area: #msc.
-        [msc serveBSC. 'MSC has exited' printNl] fork.
-
+        msc returnedFromSnapshot.
         ^ msc.
     ]
 ]
