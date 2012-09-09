@@ -52,5 +52,6 @@ Object subclass: Loader [
 Eval [
     | l | 
     l := Loader new.
-    ObjectMemory snapshot: Smalltalk arguments first
+    PackageLoader flush.
+    ObjectMemory snapshot: Smalltalk arguments first.
 ]
