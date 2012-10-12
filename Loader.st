@@ -16,42 +16,13 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 "
 "
-I am helping to get things started on the first image resume
+I am helping to create a unconfigured image
 "
 
 PackageLoader fileInPackage: #OsmoMSC.
 
-Object subclass: Loader [
-    <category: 'OsmoMSC-Loader'>
-    <comment: 'I wait for the image to resume and then I start the
-    MSC example application and put it into the OsmoMSC namespace.'>
-
-    Loader class >> new [
-        <category: 'creation'>
-
-        ^ super new
-            initialize;
-            yourself.
-    ]
-
-    initialize [
-        <category: 'creation'>
-        ObjectMemory addDependent: self.
-    ]
-
-    update: aSymbol [
-        <category: 'initialize'>
-
-        aSymbol = #returnFromSnapshot ifTrue: [
-            OsmoMSC at: #MSC put: OsmoMSC.MSCApplication startExample.
-            ObjectMemory removeDependent: self.
-        ].
-    ]
-]
-
 Eval [
     | l | 
-    l := Loader new.
     PackageLoader flush.
     ObjectMemory snapshot: Smalltalk arguments first.
 ]
