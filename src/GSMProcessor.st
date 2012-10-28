@@ -1,5 +1,5 @@
 "
- (C) 2010-2011 by Holger Hans Peter Freyther
+ (C) 2010-2012 by Holger Hans Peter Freyther
  All Rights Reserved
 
  This program is free software: you can redistribute it and/or modify
@@ -127,7 +127,7 @@ GSM transaction on a given SAPI'>
 ]
 
 OsmoGSM.SCCPConnectionBase subclass: GSMProcessor [
-    | transactions state endp connId mgcp_trans |
+    | transactions state endp connId mgcp_trans auth pending |
 
     <category: 'OsmoMSC-GSM'>
     <comment: 'I am driving a SCCP Connection. This consists of being
@@ -136,8 +136,14 @@ hosting various transactions and dispatching to them.'>
 
     GSMProcessor class >> stateInitial [<category: 'states'> ^ 0 ]
     GSMProcessor class >> stateAcked   [<category: 'states'> ^ 1 ]
-    GSMProcessor class >> stateRelease [<category: 'states'> ^ 2 ]
-    GSMProcessor class >> stateError   [<category: 'states'> ^ 3 ]
+    GSMProcessor class >> stateAuth    [<category: 'states'> ^ 2 ]
+    GSMProcessor class >> stateRelease [<category: 'states'> ^ 3 ]
+    GSMProcessor class >> stateError   [<category: 'states'> ^ 4 ]
+
+    GSMProcessor class >> authenticator [
+        <category: 'authenticator'>
+        ^ GSMNullAuthenticator
+    ]
 
     GSMProcessor class >> createAssignment: aMul timeslot: aTs [
         | ass |
@@ -218,9 +224,11 @@ hosting various transactions and dispatching to them.'>
     mapClearCompl: aData [
         <category: 'BSSMAP'>
         sem critical: [
-            self verifyState: [state = self class stateRelease].
-            self releaseAudio.
-            self release.
+            self
+                verifyState: [state = self class stateRelease];
+                releaseAudio;
+                releaseAuth;
+                release.
         ].
     ]
 
@@ -242,7 +250,9 @@ hosting various transactions and dispatching to them.'>
             ].
 
             transactions := OrderedCollection new.
-            self releaseAudio.
+            self
+                releaseAudio;
+                releaseAuth.
         ].
     ]
 
@@ -300,7 +310,31 @@ hosting various transactions and dispatching to them.'>
     openTransaction: aTran with: aMsg [
         <category: 'transaction'>
         self addTransaction: aTran.
-        aTran start: aMsg.
+
+        "The authentication has happend, just start the transaction."
+        self state = self class stateAuth ifTrue: [
+            ^ aTran start: aMsg
+        ].
+
+        "An authentication is pending."
+        auth isNil ifFalse: [
+            self logNotice: 'GSMProc(srcref:%1) auth pending.'
+                    % {self srcRef} area: #bsc.
+            pending add: (aTran -> aMsg).
+            ^ true.
+        ].
+
+        "Remember to launch this transaction"
+        pending := OrderedCollection new
+            add: (aTran -> aMsg);
+            yourself.
+
+        auth := self class authenticator new
+            connection: self;
+            onAccept: [:auth | self takeLocks: [ self authenticationAccepted]];
+            onReject: [:auth | self takeLocks: [ self authenticationRejected]];
+            yourself.
+        auth start.
     ]
 
     addTransaction: aTran [
@@ -330,6 +364,11 @@ hosting various transactions and dispatching to them.'>
     dispatchGSM: aMsg sapi: aSapi [
         <category: 'private'>
         "Must be locked"
+
+        "Pass everything to the authenticator if present."
+        auth isNil ifFalse: [
+            ^ auth onData: aMsg.
+        ].
 
         "Find an active transaction for this"
         transactions do: [:each |
@@ -395,6 +434,16 @@ hosting various transactions and dispatching to them.'>
         <category: 'call'>
         ^ conManager msc
             selectAudioRoute: self plan: aPlan leg: aLeg
+    ]
+
+    releaseAuth [
+        <category: 'auth'>
+        auth isNil
+            ifTrue: [^true].
+
+        "Give up on the authentication."
+        auth cancel.
+        auth := nil.
     ]
 
     releaseAudio [
@@ -653,5 +702,25 @@ hosting various transactions and dispatching to them.'>
     ]
 
     mdcxTimeout: aTimeout [
+    ]
+
+    authenticationAccepted [
+        <category: 'auth'>
+        "Must be locked"
+        auth := nil.
+        pending do: [:each |
+            each key start: each value].
+        pending := nil.
+    ]
+
+    authenticationRejected [
+        <category: 'auth'>
+        "Must be locked"
+
+        "TODO"
+        "Send a CM Service Request to the phone"
+
+        "Close down the connection. FIXME: use a better error value"
+        self clearCommand: 0.
     ]
 ]
