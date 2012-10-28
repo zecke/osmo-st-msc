@@ -1,5 +1,5 @@
 "
- (C) 2011 by Holger Hans Peter Freyther
+ (C) 2011-2012 by Holger Hans Peter Freyther
  All Rights Reserved
 
  This program is free software: you can redistribute it and/or modify
@@ -65,8 +65,7 @@ OsmoGSM.GSM48CCSetup extend [
         tran := (GSMMOCall on: aSapi with: self ti)
                     con: aCon;
                     yourself.
-        aCon addTransaction: tran.
-        tran start: self.
+        aCon openTransaction: tran with: self.
     ]
 ]
 

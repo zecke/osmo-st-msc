@@ -29,8 +29,7 @@ OsmoGSM.GSM48LURequest extend [
         tran := (GSMLURequest on: aSapi with: self ti)
                   con: aCon;
                   yourself.
-        aCon addTransaction: tran.
-        tran start: self.
+        aCon openTransaction: tran with: self.
     ]
 ]
 

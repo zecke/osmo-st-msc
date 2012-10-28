@@ -297,6 +297,12 @@ hosting various transactions and dispatching to them.'>
         ].
     ]
 
+    openTransaction: aTran with: aMsg [
+        <category: 'transaction'>
+        self addTransaction: aTran.
+        aTran start: aMsg.
+    ]
+
     addTransaction: aTran [
         <category: 'private'>
         "Must be locked"
