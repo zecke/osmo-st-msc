@@ -312,7 +312,7 @@ hosting various transactions and dispatching to them.'>
         self addTransaction: aTran.
 
         "The authentication has happend, just start the transaction."
-        self state = self class stateAuth ifTrue: [
+        state = self class stateAuth ifTrue: [
             ^ aTran start: aMsg
         ].
 
@@ -331,10 +331,10 @@ hosting various transactions and dispatching to them.'>
 
         auth := self class authenticator new
             connection: self;
-            onAccept: [:auth | self takeLocks: [ self authenticationAccepted]];
-            onReject: [:auth | self takeLocks: [ self authenticationRejected]];
+            onAccept: [:auth | self authenticationAccepted];
+            onReject: [:auth | self authenticationRejected];
             yourself.
-        auth start.
+        auth start: aMsg.
     ]
 
     addTransaction: aTran [
@@ -708,6 +708,7 @@ hosting various transactions and dispatching to them.'>
         <category: 'auth'>
         "Must be locked"
         auth := nil.
+        state := self class stateAuth.
         pending do: [:each |
             each key start: each value].
         pending := nil.
@@ -718,7 +719,7 @@ hosting various transactions and dispatching to them.'>
         "Must be locked"
 
         "TODO"
-        "Send a CM Service Request to the phone"
+        "Send a CM Service Reject/LU Reject to the phone"
 
         "Close down the connection. FIXME: use a better error value"
         self clearCommand: 0.

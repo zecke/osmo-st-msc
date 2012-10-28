@@ -6,6 +6,7 @@ Eval [
         fileIn: 'src/BSCConfig.st';
         fileIn: 'src/BSCListener.st';
         fileIn: 'src/BSCSCCPHandler.st';
+        fileIn: 'src/GSMAuthenticator.st';
         fileIn: 'src/GSMProcessor.st';
         fileIn: 'src/GSMMOCall.st';
         fileIn: 'src/GSMLURequest.st';

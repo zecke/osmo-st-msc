@@ -22,7 +22,9 @@ Object subclass: GSMAuthenticatorBase [
     <comment: 'I am the base class for authenticating a given
     subscriber. My subclasses can either allow everyone, store
     the IMSI and IMEI or be fully GSM compliant and ask a HLR
-    for an authentication tuple.'>
+    for an authentication tuple.
+    When calling the callbacks make sure to go through the
+    connection>>#takeLocks: selector to take the required locks.'>
 
     connection: aCon [
         <category: 'creation'>
