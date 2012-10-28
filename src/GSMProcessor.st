@@ -300,7 +300,8 @@ hosting various transactions and dispatching to them.'>
     addTransaction: aTran [
         <category: 'private'>
         "Must be locked"
-        self logDebug: 'GSMProc(srcref:%1) adding transaction %2' % {self srcRef. aTran class} area: #bsc.
+        self logDebug: 'GSMProc(srcref:%1) adding transaction %2'
+                % {self srcRef. aTran class} area: #bsc.
         transactions add: aTran.
     ]
 
