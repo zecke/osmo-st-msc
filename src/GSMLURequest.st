@@ -47,9 +47,10 @@ GSMTransaction subclass: GSMLURequest [
     start: aCCMessage [
         <category: 'start'>
 
-      aCCMessage inspect.
-      timeout := Osmo.TimerScheduler instance
-          scheduleInSeconds: 5 block: [self timeOut].
+        self logNotice: 'GSMLURequest(srcref:%1) starting LU'
+                % {con srcRef} area: #bsc.
+        timeout := Osmo.TimerScheduler instance
+            scheduleInSeconds: 5 block: [con takeLocks: [self timeOut]].
     ]
 
     timeOut [
