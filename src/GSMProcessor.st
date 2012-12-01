@@ -127,7 +127,7 @@ GSM transaction on a given SAPI'>
 ]
 
 OsmoGSM.SCCPConnectionBase subclass: GSMProcessor [
-    | transactions state endp connId mgcp_trans auth pending |
+    | transactions state endp connId mgcp_trans auth pending info |
 
     <category: 'OsmoMSC-GSM'>
     <comment: 'I am driving a SCCP Connection. This consists of being
@@ -142,7 +142,7 @@ hosting various transactions and dispatching to them.'>
 
     GSMProcessor class >> authenticator [
         <category: 'authenticator'>
-        ^ GSMNullAuthenticator
+        ^ GSMIdentityAuthenticator
     ]
 
     GSMProcessor class >> createAssignment: aMul timeslot: aTs [
@@ -164,7 +164,14 @@ hosting various transactions and dispatching to them.'>
         <category: 'creation'>
         transactions := OrderedCollection new.
         state := self class stateInitial.
+        info := Dictionary new.
         ^ super initialize.
+    ]
+
+    addInfo: aKey value: aValue [
+        <category: 'misc'>
+        "Store additional info about this call here."
+        info at: aKey put: aValue.
     ]
 
     data: aData [

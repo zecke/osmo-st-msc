@@ -27,6 +27,7 @@
         <sunit>OsmoMSC.MSCBSCConnectionHandlerTest</sunit>
         <sunit>OsmoMSC.BSCIPAConnectionTest</sunit>
         <sunit>OsmoMSC.AuthTestNull</sunit>
+        <sunit>OsmoMSC.AuthTestIdentity</sunit>
         <filein>tests/Test.st</filein>
         <filein>tests/AuthTest.st</filein>
     </test>

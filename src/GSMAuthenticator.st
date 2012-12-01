@@ -31,6 +31,11 @@ Object subclass: GSMAuthenticatorBase [
         connection := aCon.
     ]
 
+    connection [
+        <category: 'access'>
+        ^ connection
+    ]
+
     onAccept: aBlock [
         <category: 'creation'>
         "Called when the connection is accepted"
@@ -60,6 +65,11 @@ Object subclass: GSMAuthenticatorBase [
         "The GSM Connection has failed cancel everything."
         ^ self subclassResponsibility
     ]
+
+    nextPut: aMsg [
+        connection nextPutData: (OsmoGSM.BSSAPDTAP initWith: aMsg
+                                    linkIdentifier: 0).
+    ]
 ]
 
 GSMAuthenticatorBase subclass: GSMNullAuthenticator [
@@ -76,5 +86,66 @@ GSMAuthenticatorBase subclass: GSMNullAuthenticator [
 
     cancel [
         "Nothing"
+    ]
+]
+
+GSMAuthenticatorBase subclass: GSMIdentityAuthenticator [
+    | state timeout |
+    <import: OsmoGSM>
+    <category: 'OsmoMSC-GSM-Authentication'>
+    <comment: 'I query for the IMSI and IMEI but do this in an insecure
+    way and will never switch on the crypto. I will ask for the IMSI and
+    IMEI'>
+
+    cancel [
+        "Cancel all timers"
+        timeout ifNotNil: [timeout cancel. timeout := nil].
+    ]
+
+    start: aMsg [
+        "TODO we could take the IMSI from the first message but this
+        is mostly for educational purpose."
+        self askForIMSI.
+    ]
+
+    askForIMSI [
+        | req |
+
+        timeout := Osmo.TimerScheduler instance
+            scheduleInSeconds: 5 block: [self timeOut].
+
+        "I ask for the IMSI."
+        req := GSM48IdentityReq new.
+        req idType type: GSM48IdentityType typeIMSI.
+        state := #askForIMSI:.
+        self nextPut: req toMessage.
+    ]
+
+    askForIMSI: aIdResponse [
+        connection
+            addInfo: 'IMSI'
+            value: aIdResponse mi imsi.
+        self logNotice: 'GSMIdentityAuthenticator(srcref:%1) got IMSI(%2).'
+                % {connection srcRef. aIdResponse mi imsi} area: #bsc.
+        timeout cancel.
+        onAccept value: self.
+    ]
+
+    onData: aMsg [
+        [
+            self perform: state with: aMsg.
+        ] on: Exception do: [:e |
+            e logException: 'GSMIdentityAuthenticator(srcref:%1) failed dispatch.'
+                % {connection srcRef} area: #bsc.
+            timeout cancel.
+            onReject value: self.
+        ].
+    ]
+
+    timeOut [
+        self logError: 'GSMIdentityAuthenticator(srcref:%1) no reply to %2'
+               % {connection srcRef. state} area: #bsc.
+        state := #timedout:.
+        connection takeLocks: [onReject value: self].
     ]
 ]
