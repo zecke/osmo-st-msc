@@ -26,8 +26,26 @@ TestCase subclass: AuthTestNull [
                     onAccept: [:a| self assert: a = auth. accepted := true];
                     onReject: [:a| self shouldNotImplement];
                     yourself.
-        auth start: nil.
+        auth start: OsmoGSM.GSM48CMServiceReq new.
         self assert: accepted.
+    ]
+
+    testWrongInitialMessage [
+        | auth rejected wait |
+
+        Transcript nextPutAll: 'Going to send an initial message'; nl.
+
+        wait := Semaphore new.
+        auth := GSMNullAuthenticator new
+                    onAccept: [:a | ^self error: 'This should not be accepted'];
+                    onReject: [:a | self assert: a = auth. rejected := true. wait signal];
+                    yourself.
+        auth
+            connection: nil;
+            start: OsmoGSM.GSM48IdentityReq new.
+
+        wait wait.
+        self assert: rejected.
     ]
 ]
 
@@ -109,7 +127,7 @@ TestCase subclass: AuthTestIdentity [
                     yourself.
         auth
             connection: (GSMProcessorMockForAuthCheat initWith: auth);
-            start: nil.
+            start: OsmoGSM.GSM48CMServiceReq new.
 
         wait wait.
         self assert: rejected.
@@ -124,7 +142,7 @@ TestCase subclass: AuthTestIdentity [
                     yourself.
         auth
             connection: (GSMProcessorMockForAuthTimeout initWith: auth);
-            start: nil.
+            start: OsmoGSM.GSM48CMServiceReq new.
 
         wait wait.
         self assert: rejected.
@@ -139,10 +157,28 @@ TestCase subclass: AuthTestIdentity [
                     yourself.
         auth
             connection: (GSMProcessorMockForAuthIMSI initWith: auth);
-            start: nil.
+            start: OsmoGSM.GSM48CMServiceReq new.
 
         wait wait.
         self assert: accept.
         self assert: (auth connection getInfo: 'IMSI') = auth connection usedIMSI.
+    ]
+
+    testWrongInitialMessage [
+        | auth rejected wait |
+
+        Transcript nextPutAll: 'Going to send an initial message'; nl.
+
+        wait := Semaphore new.
+        auth := GSMIdentityAuthenticator new
+                    onAccept: [:a | ^self error: 'This should not be accepted'];
+                    onReject: [:a | self assert: a = auth. rejected := true. wait signal];
+                    yourself.
+        auth
+            connection: (GSMProcessorMockBase initWith: auth);
+            start: OsmoGSM.GSM48IdentityReq new.
+
+        wait wait.
+        self assert: rejected.
     ]
 ]

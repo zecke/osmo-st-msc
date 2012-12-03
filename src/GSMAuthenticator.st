@@ -25,6 +25,19 @@ Object subclass: GSMAuthenticatorBase [
     for an authentication tuple.
     When calling the callbacks make sure to go through the
     connection>>#takeLocks: selector to take the required locks.'>
+    <import: OsmoGSM>
+
+    LegalMessages := {OsmoGSM.GSM48CMServiceReq.
+                      OsmoGSM.GSM48RRPagingResponse.
+                      OsmoGSM.GSM48LURequest.
+                      "As part of Local-Call-Routing deal with CC Setup"
+                      OsmoGSM.GSM48CCSetup.
+                        }.
+
+    appropriateInitialMessage: aMsg [
+        "Check if the message is one of the allowed initial messages."
+        ^ LegalMessages includes: aMsg class
+    ]
 
     connection: aCon [
         <category: 'creation'>
@@ -67,7 +80,7 @@ Object subclass: GSMAuthenticatorBase [
     ]
 
     nextPut: aMsg [
-        connection nextPutData: (OsmoGSM.BSSAPDTAP initWith: aMsg
+        connection nextPutData: (BSSAPDTAP initWith: aMsg
                                     linkIdentifier: 0).
     ]
 ]
@@ -77,7 +90,9 @@ GSMAuthenticatorBase subclass: GSMNullAuthenticator [
     <comment: 'I accept everything...'>
 
     start: aMsg [
-        onAccept value: self.
+        (self appropriateInitialMessage: aMsg)
+            ifTrue:  [onAccept value: self]
+            ifFalse: [onReject value: self].
     ]
 
     onData: aMsg [
@@ -91,7 +106,6 @@ GSMAuthenticatorBase subclass: GSMNullAuthenticator [
 
 GSMAuthenticatorBase subclass: GSMIdentityAuthenticator [
     | state timeout |
-    <import: OsmoGSM>
     <category: 'OsmoMSC-GSM-Authentication'>
     <comment: 'I query for the IMSI and IMEI but do this in an insecure
     way and will never switch on the crypto. I will ask for the IMSI and
@@ -102,10 +116,20 @@ GSMAuthenticatorBase subclass: GSMIdentityAuthenticator [
         timeout ifNotNil: [timeout cancel. timeout := nil].
     ]
 
+    reject: aMsg [
+        <category: 'reject'>
+        self logError: 'GSMIdentityAuthenticator(srcref:%1) rejecting type %2'
+            % {connection srcRef. aMsg class} area: #bsc.
+        state := #rejected:.
+        onReject value: self.
+    ]
+
     start: aMsg [
         "TODO we could take the IMSI from the first message but this
         is mostly for educational purpose."
-        self askForIMSI.
+        (self appropriateInitialMessage: aMsg)
+            ifTrue: [self askForIMSI]
+            ifFalse: [self reject: aMsg].
     ]
 
     askForIMSI [
