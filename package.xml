@@ -13,6 +13,7 @@
     <filein>src/BSCSCCPHandler.st</filein>
     <filein>src/GSMAuthenticator.st</filein>
     <filein>src/GSMProcessor.st</filein>
+    <filein>src/GSMCMServiceRequest.st</filein>
     <filein>src/GSMMOCall.st</filein>
     <filein>src/GSMLURequest.st</filein>
     <filein>src/BSCIPAConnection.st</filein>

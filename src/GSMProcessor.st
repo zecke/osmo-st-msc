@@ -79,6 +79,10 @@ GSM transaction on a given SAPI'>
             yourself
     ]
 
+    canHandle: aMsg sapi: aSapi [
+        ^ self sapi = aSapi and: [self ti = aMsg ti].
+    ]
+
     sapi [
         <category: 'accessing'>
         ^ sapi
@@ -377,9 +381,12 @@ hosting various transactions and dispatching to them.'>
             ^ auth onData: aMsg.
         ].
 
-        "Find an active transaction for this"
+        "Find an active transaction for this. TODO: For CM Service Request
+        we need to hand everything there. With multiple transactions we
+        should have a ranking. E.g. with bi-directional SMS this needs to be
+        handled specially. We need the existing transaction to take preference."
         transactions do: [:each |
-            (each sapi = aSapi and: [each ti = aMsg ti]) ifTrue: [
+            (each canHandle: aMsg sapi: aSapi) ifTrue: [
                 each dispatch: aMsg.
                 self checkRelease.
                 ^ true.
@@ -714,6 +721,7 @@ hosting various transactions and dispatching to them.'>
     authenticationAccepted [
         <category: 'auth'>
         "Must be locked"
+        "TODO: where to start the encryption? CM Service Accept/Ciphering Command?"
         auth := nil.
         state := self class stateAuth.
         pending do: [:each |
@@ -726,7 +734,8 @@ hosting various transactions and dispatching to them.'>
         "Must be locked"
 
         "TODO"
-        "Send a CM Service Reject/LU Reject to the phone"
+        "Send a CM Service Reject/LU Reject to the phone. Probably the
+        transaction should reject it."
 
         "Close down the connection. FIXME: use a better error value"
         self clearCommand: 0.
