@@ -55,6 +55,7 @@ GSMTransaction subclass: GSMLURequest [
 
     timeOut [
         self logError: 'GSMLURequest(srcref:%1) timeout.' % {con srcRef} area: #bsc.
+        self nextPutSapi: OsmoGSM.GSM48LUReject new.
         con removeTransaction: self.
     ]
 ]
