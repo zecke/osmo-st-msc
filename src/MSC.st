@@ -245,6 +245,18 @@ Object subclass: MSCApplication [
             sip]
     ]
 
+    selectAudioRouteForEmergency: aCon leg: aLeg [
+        ^ (SIPMTCall
+            fromUser: 'sip:1000@sip.zecke.osmocom.org'
+            host: '127.0.0.1'
+            port: 5060
+            to: 'sip:911@127.0.0.1'
+            on: self sipGateway)
+            remoteLeg: aLeg;
+            yourself
+    ]
+
+
     selectAudioRoute: aCon plan: aPlan leg: aLeg [
         | nr |
         "TODO: Very simple and hardcoded rule"

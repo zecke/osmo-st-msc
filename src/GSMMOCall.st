@@ -244,9 +244,7 @@ GSMTransaction subclass: GSMMOCall [
         con removeTransaction: self.
     ]
 
-    start: aCCMessage [
-        <category: 'transaction'>
-
+    selectAudioRoute: aCCMessage [
         "select route for this call, or release the call"
         remoteLeg := con selectAudioRoute: aCCMessage calledOrDefault leg: self.
         remoteLeg isNil ifTrue: [
@@ -254,8 +252,14 @@ GSMTransaction subclass: GSMMOCall [
                 'GSMMOCall(srcref:%1) failed to select audio route.'
                     % {con srcRef} area: #bsc.
             self releaseComplete.
-            ^ self
         ].
+    ]
+
+    start: aCCMessage [
+        <category: 'transaction'>
+
+        self selectAudioRoute: aCCMessage.
+        remoteLeg isNil ifTrue: [^self].
 
         "Failed to allocate an endpoint"
         con allocateEndpoint isNil ifTrue: [

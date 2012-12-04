@@ -11,6 +11,7 @@ Eval [
         fileIn: 'src/GSMMOCall.st';
         fileIn: 'src/GSMLURequest.st';
         fileIn: 'src/GSMCMServiceRequest.st';
+        fileIn: 'src/GSMEmergencySetup.st';
         fileIn: 'src/BSCIPAConnection.st';
         fileIn: 'src/MSC.st';
         fileIn: 'src/SIPCall.st'.

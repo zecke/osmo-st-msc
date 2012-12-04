@@ -99,6 +99,11 @@ GSM transaction on a given SAPI'>
         con := aCon.
     ]
 
+    con [
+        <category: 'creation'>
+        ^ con
+    ]
+
     assignmentFailure [
         "The audio assignment has failed."
     ]
@@ -442,6 +447,12 @@ hosting various transactions and dispatching to them.'>
     callAgent [
         <category: 'audio'>
         ^ conManager msc mgcpCallAgent
+    ]
+
+    selectAudioRouteForEmergency: aLeg [
+        <category: 'call'>
+        ^ conManager msc
+            selectAudioRouteForEmergency: self leg: aLeg.
     ]
 
     selectAudioRoute: aPlan leg: aLeg [

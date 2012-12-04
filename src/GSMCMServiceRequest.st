@@ -37,6 +37,21 @@ OsmoGSM.GSM48MSG extend [
     ]
 ]
 
+OsmoGSM.GSM48CCEmergencySetup extend [
+    dispatchForCMOn: aCM [
+        | call |
+        <category: '*-OsmoMSC-GSM'>
+
+        "Start the Emergency Call"
+        call := (GSMEmergencyCall on: 0 with: self ti)
+                    con: aCM con; yourself.
+        aCM con openTransaction: call with: self.
+
+        "The CMServiceRequest transaction can go away now."
+        ^ true
+    ]
+]
+
 GSMTransaction subclass: GSMCMServiceRequest [
     | timeout service state |
     <category: 'OsmoMSC-GSM'>
