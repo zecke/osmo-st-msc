@@ -1,5 +1,5 @@
 "
- (C) 2010-2012 by Holger Hans Peter Freyther
+ (C) 2010-2013 by Holger Hans Peter Freyther
  All Rights Reserved
 
  This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 PackageLoader fileInPackage: #Sockets.
 
 Object subclass: BSCConfigItem [
-    | peer token name lac connected osmoExtension |
+    | peer token name lac connection osmoExtension |
 
     <category: 'OsmoMSC-BSC'>
     <comment: 'I hold the configuration for one BSC Item. It consists of the
@@ -29,7 +29,7 @@ peer address, the lac, if it is connected'>
         ^ self new
             peer: aPeer;
             name: aName;
-            connected: false;
+            connection: nil;
             sendOsmoRSIP: false;
             lac: -1;
             yourself
@@ -60,10 +60,14 @@ peer address, the lac, if it is connected'>
         lac := aLac.
     ]
 
-    connected [ <category: 'accessing'> ^ connected ]
-    connected: aState [
+    connected [
+        <category: 'accessing'>
+        ^ connection isNil not
+    ]
+
+    connection: aCon [
         <category: 'private'>
-        connected := aState.
+        connection := aCon.
     ]
 
     sendOsmoRSIP [ <category: 'accessing'> ^ osmoExtension ]

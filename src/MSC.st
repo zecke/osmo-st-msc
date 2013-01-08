@@ -1,5 +1,5 @@
 "
- (C) 2010-2011 by Holger Hans Peter Freyther
+ (C) 2010-2013 by Holger Hans Peter Freyther
  All Rights Reserved
 
  This program is free software: you can redistribute it and/or modify
@@ -110,11 +110,11 @@ Object subclass: MSCBSCConnectionHandler [
             Processor activeProcess name: 'MSCBSCConnectionHandler(%1)' % {aConfig lac}.
 
             [[
-                aConfig connected: true.
+                aConfig connection: bsc.
                 self connections add: bsc.
                 bsc process. 
             ] on: SystemExceptions.EndOfStream do: [:ex |
-                aConfig connected: false.
+                aConfig connection: nil.
                 self logNotice: 'BSC disconnected for lac: %1' % {aConfig lac}
                      area: #bsc.
             ] on: Exception do: [:ex |
@@ -129,7 +129,7 @@ Object subclass: MSCBSCConnectionHandler [
                     self logError: 'BSC was never added on lac: %1?' % {aConfig lac}
                         area: #bsc].
 
-                aConfig connected: false.
+                aConfig connection: nil.
                 aConnection close.
             ].
         ] fork.  
