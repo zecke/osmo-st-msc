@@ -160,7 +160,7 @@ Object subclass: MSCBSCConnectionHandler [
 ]
 
 Object subclass: MSCApplication [
-    | hlr vlr config bscListener bscConfig bscConHandler mgcp sip |
+    | hlr vlr config bscListener bscConfig bscConHandler mgcp sip paging |
 
     <category: 'OsmoMSC-MSC'>
     <comment: 'I am a MSC as I have the VLR/HLR and other instances'>
@@ -189,6 +189,8 @@ Object subclass: MSCApplication [
 
     hlr [ ^ hlr ifNil: [HLRLocalCollection new]]
     vlr [ ^ vlr ifNil: [VLRLocalCollection new]]
+
+    pagingManager [ ^ paging ifNil: [paging := PagingManager initWith: self]]
 
     config [ ^ config ifNil: [config := MSCConfig new]]
     bscConfig [ ^ bscConfig ifNil: [bscConfig := BSCConfig new]]

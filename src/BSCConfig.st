@@ -70,6 +70,11 @@ peer address, the lac, if it is connected'>
         connection := aCon.
     ]
 
+    connection [
+        <category: 'private'>
+        ^ connection
+    ]
+
     sendOsmoRSIP [ <category: 'accessing'> ^ osmoExtension ]
     sendOsmoRSIP: useExtension [
         <category: 'private'>

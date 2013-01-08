@@ -17,6 +17,7 @@
     <filein>src/GSMMOCall.st</filein>
     <filein>src/GSMLURequest.st</filein>
     <filein>src/GSMEmergencySetup.st</filein>
+    <filein>src/PagingManager.st</filein>
     <filein>src/BSCIPAConnection.st</filein>
     <filein>src/MSC.st</filein>
     <filein>src/SIPCall.st</filein>

@@ -1,5 +1,5 @@
 "
- (C) 2010-2011 by Holger Hans Peter Freyther
+ (C) 2010-2013 by Holger Hans Peter Freyther
  All Rights Reserved
 
  This program is free software: you can redistribute it and/or modify
@@ -85,6 +85,13 @@ Object subclass: BSCConnection [
         (Osmo.MGCPTransaction on: (trunk endpointAt: 2) of: msc mgcpCallAgent)
           command: Osmo.MGCPOsmoRSIPCommand createRSIP;
           startSingleShot.
+    ]
+
+    sendUdt: aMsg [
+        | udt addr |
+        addr := Osmo.SCCPAddress createWith: 254.
+        udt := Osmo.SCCPUDT initWith: addr calling: addr data: aMsg.
+        ^ self send: udt toMessage with:Osmo.IPAConstants protocolSCCP.
     ]
 ]
 
