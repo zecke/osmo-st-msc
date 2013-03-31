@@ -23,7 +23,7 @@ PackageLoader
 OsmoGSM.GSM48LURequest extend [
     openTransactionOn: aCon sapi: aSapi [
         | tran |
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         'foo' printNl.
 
         tran := (GSMLURequest on: aSapi with: self ti)

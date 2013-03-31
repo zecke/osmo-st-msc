@@ -17,6 +17,7 @@
 "
 
 TestCase subclass: AuthTestNull [
+    <category: 'OsmoMSC-Tests'>
     <comment: 'I smoke-test the null authenticator and that it
     fires an accept callback right away.'>
 
@@ -51,6 +52,7 @@ TestCase subclass: AuthTestNull [
 
 Object subclass: GSMProcessorMockBase [
     | auth dict |
+    <category: 'OsmoMSC-Tests'>
 
     GSMProcessorMockBase class >> initWith: anAuth [
         ^ self new
@@ -77,6 +79,8 @@ Object subclass: GSMProcessorMockBase [
 ]
 
 GSMProcessorMockBase subclass: GSMProcessorMockForAuthCheat [
+    <category: 'OsmoMSC-Tests'>
+
     nextPutData: aData [
         "Ignore the data for now. Should be a identity request"
         OsmoDispatcher dispatchBlock: [
@@ -90,6 +94,8 @@ GSMProcessorMockBase subclass: GSMProcessorMockForAuthCheat [
 ]
 
 GSMProcessorMockBase subclass: GSMProcessorMockForAuthIMSI [
+    <category: 'OsmoMSC-Tests'>
+
     usedIMSI [
         ^ '234324234234'
     ]
@@ -107,12 +113,15 @@ GSMProcessorMockBase subclass: GSMProcessorMockForAuthIMSI [
 ]
 
 GSMProcessorMockBase subclass: GSMProcessorMockForAuthTimeout [
+    <category: 'OsmoMSC-Tests'>
+
     nextPutData: aData [
         "Do nothing"
     ]
 ]
 
 TestCase subclass: AuthTestIdentity [
+    <category: 'OsmoMSC-Tests'>
     <comment: 'I test various aspects of the IMSI requestor.'>
 
     testWrongResponse [

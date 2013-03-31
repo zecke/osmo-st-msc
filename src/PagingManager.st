@@ -18,6 +18,7 @@
 
 Object subclass: PagingManager [
     | msc |
+    <category: 'OsmoMSC-GSM'>
 
     PagingManager class >> initWith: aMsc [
         ^ self new

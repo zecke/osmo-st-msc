@@ -20,19 +20,19 @@ PackageLoader fileInPackage: 'OsmoGSM'.
 
 OsmoGSM.BSSAPMessage extend [
     dispatchTrans: aCon [
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         aCon bssapUnknownData: self
     ]
 ]
 
 OsmoGSM.BSSAPManagement extend [
     dispatchTrans: aCon [
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         self dispatchMAP: aCon.
     ]
 
     dispatchMAP: aCon [
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         (Dictionary from: {
             OsmoGSM.GSM0808Helper msgComplL3   -> #mapLayer3:.
             OsmoGSM.GSM0808Helper msgClearReq  -> #mapClearReq:.
@@ -51,14 +51,14 @@ OsmoGSM.BSSAPManagement extend [
 
 OsmoGSM.BSSAPDTAP extend [
     dispatchTrans: aCon [
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         aCon dispatchDTAP: self.
     ]
 ]
 
 OsmoGSM.GSM48MSG extend [
     openTransactionOn: aCon sapi: aSapi [
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         self logError: 'Can not open transaction for %1' % {self class} area: #bsc.
     ]
 ]

@@ -19,7 +19,7 @@
 OsmoGSM.GSM48CMServiceReq extend [
     openTransactionOn: aCon sapi: aSapi [
         | tran |
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
 
         "This is weird. We can accept or reject the service."
         tran := (GSMCMServiceRequest on: aSapi with: self ti)
@@ -30,7 +30,7 @@ OsmoGSM.GSM48CMServiceReq extend [
 
 OsmoGSM.GSM48MSG extend [
     dispatchForCMOn: aCon [
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         self logError: '%1(srcref:%2) unknown dispatch for CM Service Request'
             % {self class. aCon srcref} with: #bsc.
         ^ false
@@ -40,7 +40,7 @@ OsmoGSM.GSM48MSG extend [
 OsmoGSM.GSM48CCEmergencySetup extend [
     dispatchForCMOn: aCM [
         | call |
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
 
         "Start the Emergency Call"
         call := (GSMEmergencyCall on: 0 with: self ti)

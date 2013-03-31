@@ -301,7 +301,7 @@ Object subclass: MSCApplication [
             bscPort: 5000;
             sipIP: '127.0.0.1'.
         msc bscConfig
-            addBSC: '127.0.0.1' withName: 'test1' andLac: 4711 sendOsmoRSIP: true;
+            addBSC: '127.0.0.1' withName: 'test1' andLac: 8210 sendOsmoRSIP: true;
             addBSC: '10.240.240.1' withName: 'test2' andLac: 4712 sendOsmoRSIP: true.
 
         msc returnedFromSnapshot.
