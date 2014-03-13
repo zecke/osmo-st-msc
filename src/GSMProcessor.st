@@ -622,7 +622,7 @@ hosting various transactions and dispatching to them.'>
         endp sdp: aResult sdp.
 
         "Check what to do next"
-        state = self class stateAcked
+        (state = self class stateAcked or: [state = self class stateAuth])
             ifTrue:  [
                 self logDebug: 'GSMProc(srcref:%1) CRCX compl(%2) Code: %3.'
                         % {self srcRef. endp callId. aResult code} area: #bsc.
