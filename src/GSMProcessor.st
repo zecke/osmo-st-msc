@@ -20,19 +20,19 @@ PackageLoader fileInPackage: 'OsmoGSM'.
 
 OsmoGSM.BSSAPMessage extend [
     dispatchTrans: aCon [
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         aCon bssapUnknownData: self
     ]
 ]
 
 OsmoGSM.BSSAPManagement extend [
     dispatchTrans: aCon [
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         self dispatchMAP: aCon.
     ]
 
     dispatchMAP: aCon [
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         (Dictionary from: {
             OsmoGSM.GSM0808Helper msgComplL3   -> #mapLayer3:.
             OsmoGSM.GSM0808Helper msgClearReq  -> #mapClearReq:.
@@ -51,14 +51,14 @@ OsmoGSM.BSSAPManagement extend [
 
 OsmoGSM.BSSAPDTAP extend [
     dispatchTrans: aCon [
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         aCon dispatchDTAP: self.
     ]
 ]
 
 OsmoGSM.GSM48MSG extend [
     openTransactionOn: aCon sapi: aSapi [
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         self logError: 'Can not open transaction for %1' % {self class} area: #bsc.
     ]
 ]
@@ -79,6 +79,10 @@ GSM transaction on a given SAPI'>
             yourself
     ]
 
+    canHandle: aMsg sapi: aSapi [
+        ^ self sapi = aSapi and: [self ti = aMsg ti].
+    ]
+
     sapi [
         <category: 'accessing'>
         ^ sapi
@@ -93,6 +97,11 @@ GSM transaction on a given SAPI'>
     con: aCon [
         <category: 'creation'>
         con := aCon.
+    ]
+
+    con [
+        <category: 'creation'>
+        ^ con
     ]
 
     assignmentFailure [
@@ -127,7 +136,7 @@ GSM transaction on a given SAPI'>
 ]
 
 OsmoGSM.SCCPConnectionBase subclass: GSMProcessor [
-    | transactions state endp connId mgcp_trans auth pending |
+    | transactions state endp connId mgcp_trans auth pending info |
 
     <category: 'OsmoMSC-GSM'>
     <comment: 'I am driving a SCCP Connection. This consists of being
@@ -142,7 +151,7 @@ hosting various transactions and dispatching to them.'>
 
     GSMProcessor class >> authenticator [
         <category: 'authenticator'>
-        ^ GSMNullAuthenticator
+        ^ GSMIdentityAuthenticator
     ]
 
     GSMProcessor class >> createAssignment: aMul timeslot: aTs [
@@ -164,7 +173,14 @@ hosting various transactions and dispatching to them.'>
         <category: 'creation'>
         transactions := OrderedCollection new.
         state := self class stateInitial.
+        info := Dictionary new.
         ^ super initialize.
+    ]
+
+    addInfo: aKey value: aValue [
+        <category: 'misc'>
+        "Store additional info about this call here."
+        info at: aKey put: aValue.
     ]
 
     data: aData [
@@ -312,7 +328,7 @@ hosting various transactions and dispatching to them.'>
         self addTransaction: aTran.
 
         "The authentication has happend, just start the transaction."
-        self state = self class stateAuth ifTrue: [
+        state = self class stateAuth ifTrue: [
             ^ aTran start: aMsg
         ].
 
@@ -331,10 +347,10 @@ hosting various transactions and dispatching to them.'>
 
         auth := self class authenticator new
             connection: self;
-            onAccept: [:auth | self takeLocks: [ self authenticationAccepted]];
-            onReject: [:auth | self takeLocks: [ self authenticationRejected]];
+            onAccept: [:auth | self authenticationAccepted];
+            onReject: [:auth | self authenticationRejected];
             yourself.
-        auth start.
+        auth start: aMsg.
     ]
 
     addTransaction: aTran [
@@ -370,9 +386,12 @@ hosting various transactions and dispatching to them.'>
             ^ auth onData: aMsg.
         ].
 
-        "Find an active transaction for this"
+        "Find an active transaction for this. TODO: For CM Service Request
+        we need to hand everything there. With multiple transactions we
+        should have a ranking. E.g. with bi-directional SMS this needs to be
+        handled specially. We need the existing transaction to take preference."
         transactions do: [:each |
-            (each sapi = aSapi and: [each ti = aMsg ti]) ifTrue: [
+            (each canHandle: aMsg sapi: aSapi) ifTrue: [
                 each dispatch: aMsg.
                 self checkRelease.
                 ^ true.
@@ -428,6 +447,12 @@ hosting various transactions and dispatching to them.'>
     callAgent [
         <category: 'audio'>
         ^ conManager msc mgcpCallAgent
+    ]
+
+    selectAudioRouteForEmergency: aLeg [
+        <category: 'call'>
+        ^ conManager msc
+            selectAudioRouteForEmergency: self leg: aLeg.
     ]
 
     selectAudioRoute: aPlan leg: aLeg [
@@ -707,7 +732,9 @@ hosting various transactions and dispatching to them.'>
     authenticationAccepted [
         <category: 'auth'>
         "Must be locked"
+        "TODO: where to start the encryption? CM Service Accept/Ciphering Command?"
         auth := nil.
+        state := self class stateAuth.
         pending do: [:each |
             each key start: each value].
         pending := nil.
@@ -718,7 +745,8 @@ hosting various transactions and dispatching to them.'>
         "Must be locked"
 
         "TODO"
-        "Send a CM Service Request to the phone"
+        "Send a CM Service Reject/LU Reject to the phone. Probably the
+        transaction should reject it."
 
         "Close down the connection. FIXME: use a better error value"
         self clearCommand: 0.

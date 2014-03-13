@@ -18,42 +18,42 @@
 
 OsmoGSM.GSM48MSG extend [
     dispatchMoCall: aCon [
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         aCon moUnknown: self.
     ]
 ]
 
 OsmoGSM.GSM48CCConnectAck extend [
     dispatchMoCall: aCon [
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         aCon moConnectAck: self.
     ]
 ]
 
 OsmoGSM.GSM48CCDisconnect extend [
     dispatchMoCall: aCon [
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         aCon moDisconnect: self.
     ]
 ]
 
 OsmoGSM.GSM48CCRelease extend [
     dispatchMoCall: aCon [
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         aCon moRelease: self.
     ]
 ]
 
 OsmoGSM.GSM48CCReleaseCompl extend [
     dispatchMoCall: aCon [
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         aCon moReleaseCompl: self.
     ]
 ]
 
 OsmoGSM.GSM48CCStatus extend [
     dispatchMoCall: aCon [
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         aCon moStatus: self.
     ]
 ]
@@ -61,7 +61,7 @@ OsmoGSM.GSM48CCStatus extend [
 OsmoGSM.GSM48CCSetup extend [
     openTransactionOn: aCon sapi: aSapi [
         | tran |
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         tran := (GSMMOCall on: aSapi with: self ti)
                     con: aCon;
                     yourself.
@@ -244,9 +244,7 @@ GSMTransaction subclass: GSMMOCall [
         con removeTransaction: self.
     ]
 
-    start: aCCMessage [
-        <category: 'transaction'>
-
+    selectAudioRoute: aCCMessage [
         "select route for this call, or release the call"
         remoteLeg := con selectAudioRoute: aCCMessage calledOrDefault leg: self.
         remoteLeg isNil ifTrue: [
@@ -254,8 +252,14 @@ GSMTransaction subclass: GSMMOCall [
                 'GSMMOCall(srcref:%1) failed to select audio route.'
                     % {con srcRef} area: #bsc.
             self releaseComplete.
-            ^ self
         ].
+    ]
+
+    start: aCCMessage [
+        <category: 'transaction'>
+
+        self selectAudioRoute: aCCMessage.
+        remoteLeg isNil ifTrue: [^self].
 
         "Failed to allocate an endpoint"
         con allocateEndpoint isNil ifTrue: [

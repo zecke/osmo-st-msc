@@ -23,7 +23,7 @@ PackageLoader
 OsmoGSM.GSM48LURequest extend [
     openTransactionOn: aCon sapi: aSapi [
         | tran |
-        <category: '*-OsmoMSC-GSM'>
+        <category: '*OsmoMSC-GSM'>
         'foo' printNl.
 
         tran := (GSMLURequest on: aSapi with: self ti)
@@ -47,13 +47,15 @@ GSMTransaction subclass: GSMLURequest [
     start: aCCMessage [
         <category: 'start'>
 
-      aCCMessage inspect.
-      timeout := Osmo.TimerScheduler instance
-          scheduleInSeconds: 5 block: [self timeOut].
+        self logNotice: 'GSMLURequest(srcref:%1) starting LU'
+                % {con srcRef} area: #bsc.
+        timeout := Osmo.TimerScheduler instance
+            scheduleInSeconds: 5 block: [con takeLocks: [self timeOut]].
     ]
 
     timeOut [
         self logError: 'GSMLURequest(srcref:%1) timeout.' % {con srcRef} area: #bsc.
+        self nextPutSapi: OsmoGSM.GSM48LUReject new.
         con removeTransaction: self.
     ]
 ]

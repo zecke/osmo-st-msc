@@ -1,5 +1,5 @@
 "
- (C) 2010-2011 by Holger Hans Peter Freyther
+ (C) 2010-2013 by Holger Hans Peter Freyther
  All Rights Reserved
 
  This program is free software: you can redistribute it and/or modify
@@ -110,11 +110,11 @@ Object subclass: MSCBSCConnectionHandler [
             Processor activeProcess name: 'MSCBSCConnectionHandler(%1)' % {aConfig lac}.
 
             [[
-                aConfig connected: true.
+                aConfig connection: bsc.
                 self connections add: bsc.
                 bsc process. 
             ] on: SystemExceptions.EndOfStream do: [:ex |
-                aConfig connected: false.
+                aConfig connection: nil.
                 self logNotice: 'BSC disconnected for lac: %1' % {aConfig lac}
                      area: #bsc.
             ] on: Exception do: [:ex |
@@ -129,7 +129,7 @@ Object subclass: MSCBSCConnectionHandler [
                     self logError: 'BSC was never added on lac: %1?' % {aConfig lac}
                         area: #bsc].
 
-                aConfig connected: false.
+                aConfig connection: nil.
                 aConnection close.
             ].
         ] fork.  
@@ -160,7 +160,7 @@ Object subclass: MSCBSCConnectionHandler [
 ]
 
 Object subclass: MSCApplication [
-    | hlr vlr config bscListener bscConfig bscConHandler mgcp sip |
+    | hlr vlr config bscListener bscConfig bscConHandler mgcp sip paging |
 
     <category: 'OsmoMSC-MSC'>
     <comment: 'I am a MSC as I have the VLR/HLR and other instances'>
@@ -189,6 +189,8 @@ Object subclass: MSCApplication [
 
     hlr [ ^ hlr ifNil: [HLRLocalCollection new]]
     vlr [ ^ vlr ifNil: [VLRLocalCollection new]]
+
+    pagingManager [ ^ paging ifNil: [paging := PagingManager initWith: self]]
 
     config [ ^ config ifNil: [config := MSCConfig new]]
     bscConfig [ ^ bscConfig ifNil: [bscConfig := BSCConfig new]]
@@ -245,6 +247,18 @@ Object subclass: MSCApplication [
             sip]
     ]
 
+    selectAudioRouteForEmergency: aCon leg: aLeg [
+        ^ (SIPMTCall
+            fromUser: 'sip:1000@sip.zecke.osmocom.org'
+            host: '127.0.0.1'
+            port: 5060
+            to: 'sip:911@127.0.0.1'
+            on: self sipGateway)
+            remoteLeg: aLeg;
+            yourself
+    ]
+
+
     selectAudioRoute: aCon plan: aPlan leg: aLeg [
         | nr |
         "TODO: Very simple and hardcoded rule"
@@ -287,7 +301,7 @@ Object subclass: MSCApplication [
             bscPort: 5000;
             sipIP: '127.0.0.1'.
         msc bscConfig
-            addBSC: '127.0.0.1' withName: 'test1' andLac: 4711 sendOsmoRSIP: true;
+            addBSC: '127.0.0.1' withName: 'test1' andLac: 8210 sendOsmoRSIP: true;
             addBSC: '10.240.240.1' withName: 'test2' andLac: 4712 sendOsmoRSIP: true.
 
         msc returnedFromSnapshot.

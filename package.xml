@@ -11,9 +11,13 @@
     <filein>src/BSCConfig.st</filein>
     <filein>src/BSCListener.st</filein>
     <filein>src/BSCSCCPHandler.st</filein>
+    <filein>src/GSMAuthenticator.st</filein>
     <filein>src/GSMProcessor.st</filein>
+    <filein>src/GSMCMServiceRequest.st</filein>
     <filein>src/GSMMOCall.st</filein>
     <filein>src/GSMLURequest.st</filein>
+    <filein>src/GSMEmergencySetup.st</filein>
+    <filein>src/PagingManager.st</filein>
     <filein>src/BSCIPAConnection.st</filein>
     <filein>src/MSC.st</filein>
     <filein>src/SIPCall.st</filein>
@@ -25,6 +29,9 @@
         <sunit>OsmoMSC.BSCListenerTest</sunit>
         <sunit>OsmoMSC.MSCBSCConnectionHandlerTest</sunit>
         <sunit>OsmoMSC.BSCIPAConnectionTest</sunit>
+        <sunit>OsmoMSC.AuthTestNull</sunit>
+        <sunit>OsmoMSC.AuthTestIdentity</sunit>
         <filein>tests/Test.st</filein>
+        <filein>tests/AuthTest.st</filein>
     </test>
 </package>
