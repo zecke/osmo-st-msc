@@ -31,7 +31,18 @@
         <sunit>OsmoMSC.BSCIPAConnectionTest</sunit>
         <sunit>OsmoMSC.AuthTestNull</sunit>
         <sunit>OsmoMSC.AuthTestIdentity</sunit>
-        <filein>tests/Test.st</filein>
-        <filein>tests/AuthTest.st</filein>
+        <filein>tests/HLRDummyResolver.st</filein>
+        <filein>tests/BSCConfigTest.st</filein>
+        <filein>tests/BSCIPAConnectionTest.st</filein>
+        <filein>tests/BSCListenerTest.st</filein>
+        <filein>tests/HLRTest.st</filein>
+        <filein>tests/MSCBSCConnectionHandlerTest.st</filein>
+        <filein>tests/VLRTest.st</filein>
+        <filein>tests/AuthTestIdentity.st</filein>
+        <filein>tests/AuthTestNull.st</filein>
+        <filein>tests/GSMProcessorMockBase.st</filein>
+        <filein>tests/GSMProcessorMockForAuthCheat.st</filein>
+        <filein>tests/GSMProcessorMockForAuthIMSI.st</filein>
+        <filein>tests/GSMProcessorMockForAuthTimeout.st</filein>
     </test>
 </package>
