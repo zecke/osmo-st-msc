@@ -244,6 +244,15 @@ GSMTransaction subclass: GSMMOCall [
         con removeTransaction: self.
     ]
 
+    changeRemoteLeg: aLeg [
+        self logNotice:
+                'GSMMOCall(srcref:%1) changing remote leg'
+                    % {con srcRef} area: #bsc.
+
+        remoteLeg := aLeg.
+        remoteLeg createCall: con sdpFile.
+    ]
+
     selectAudioRoute: aCCMessage [
         "select route for this call, or release the call"
         remoteLeg := con selectAudioRoute: aCCMessage calledOrDefault leg: self.

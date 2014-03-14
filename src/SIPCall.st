@@ -19,15 +19,24 @@
 PackageLoader fileInPackage: 'OsmoSIP'.
 
 Osmo.SIPCall subclass: SIPMTCall [
-    | remoteLeg sdp_alert |
+    | remoteLeg sdp_alert msc |
 
     <category: 'OsmoMSC-SIP'>
     <comment: 'I represent a SIP terminated call. It is called Mobile
     Terminated to stay with the GSM speech.'>
 
+    msc: aMsc [
+        <category: 'creation'>
+        msc := aMsc
+    ]
+
     remoteLeg: aLeg [
         <category: 'creation'>
         remoteLeg := aLeg.
+    ]
+
+    remoteLeg [
+        ^remoteLeg
     ]
 
     netTerminate [
@@ -37,6 +46,14 @@ Osmo.SIPCall subclass: SIPMTCall [
 
         remoteLeg := nil.
         self terminate.
+    ]
+
+    sessionRedirect: aContact [
+        | newLeg |
+        remoteLeg ifNil: [^self].
+
+        newLeg := msc selectRedirectFor: self to: aContact.
+        remoteLeg changeRemoteLeg: newLeg.
     ]
 
     sessionNew [

@@ -255,9 +255,21 @@ Object subclass: MSCApplication [
             to: 'sip:911@127.0.0.1'
             on: self sipGateway)
             remoteLeg: aLeg;
+            msc: self;
             yourself
     ]
 
+    selectRedirectFor: aSipCall to: aSipContact [
+        ^ (SIPMTCall
+            fromUser: 'sip:1000@sip.zecke.osmocom.org'
+            host: '127.0.0.1'
+            port: 5060
+            to: aSipContact
+            on: self sipGateway)
+            remoteLeg: aSipCall remoteLeg;
+            msc: self;
+            yourself
+    ]
 
     selectAudioRoute: aCon plan: aPlan leg: aLeg [
         | nr |
@@ -278,6 +290,7 @@ Object subclass: MSCApplication [
             to: 'sip:1%1@127.0.0.1' % {nr allButFirst}
             on: self sipGateway)
             remoteLeg: aLeg;
+            msc: self;
             yourself
     ]
 
