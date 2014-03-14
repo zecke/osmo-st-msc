@@ -285,7 +285,7 @@ GSMTransaction subclass: GSMMOCall [
     ]
 
     cancel [
-        remoteLeg ifNotNil: [remoteLeg netTerminate].
+        remoteLeg ifNotNil: [remoteLeg netTerminate. remoteLeg := nil].
         ^ super cancel
     ]
 
