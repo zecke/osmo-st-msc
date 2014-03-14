@@ -162,7 +162,8 @@ hosting various transactions and dispatching to them.'>
             addIe: ((GSM0808ChannelTypeIE
                     initWith: GSM0808ChannelTypeIE speechSpeech
                     audio: GSM0808ChannelTypeIE chanSpeechFullPref)
-                        audioCodecs: {GSM0808ChannelTypeIE speechFullRateVersion3.
+                        audioCodecs: {GSM0808ChannelTypeIE speechFullRateVersion1.
+                                      GSM0808ChannelTypeIE speechFullRateVersion3.
                                       GSM0808ChannelTypeIE speechHalfRateVersion3};
                         yourself);
             addIe: (GSM0808CICIE initWithMultiplex: aMul timeslot: aTs).
