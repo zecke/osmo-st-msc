@@ -75,9 +75,11 @@ Osmo.SIPCall subclass: SIPMTCall [
     ]
 
     sessionNotification: aNot [
+        | code |
         "The session has some information. We will use it to tell
         the other leg of the connection."
-        (aNot code asInteger = 183) ifTrue: [
+        code := aNot code asInteger.
+        ((code = 180) or: [code = 183]) ifTrue: [
             remoteLeg isNil ifFalse: [
                 sdp_alert := aNot sdp.
                 remoteLeg netAlerting]].
