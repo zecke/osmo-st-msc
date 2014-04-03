@@ -158,7 +158,7 @@ GSMAuthenticatorBase subclass: GSMIdentityAuthenticator [
     onData: aMsg [
         [
             self perform: state with: aMsg.
-        ] on: Exception do: [:e |
+        ] on: Error do: [:e |
             e logException: 'GSMIdentityAuthenticator(srcref:%1) failed dispatch.'
                 % {connection srcRef} area: #bsc.
             timeout cancel.
