@@ -14,13 +14,14 @@
     <filein>src/GSMAuthenticator.st</filein>
     <filein>src/GSMProcessor.st</filein>
     <filein>src/GSMCMServiceRequest.st</filein>
-    <filein>src/GSMMOCall.st</filein>
     <filein>src/GSMLURequest.st</filein>
     <filein>src/GSMEmergencySetup.st</filein>
     <filein>src/PagingManager.st</filein>
     <filein>src/BSCIPAConnection.st</filein>
     <filein>src/MSC.st</filein>
-    <filein>src/SIPCall.st</filein>
+    <filein>src/call/Extensions.st</filein>
+    <filein>src/call/GSMMOCall.st</filein>
+    <filein>src/call/SIPMTCall.st</filein>
 
     <test>
         <sunit>OsmoMSC.HLRTest</sunit>

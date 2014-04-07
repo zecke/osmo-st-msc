@@ -16,12 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 "
 
-PackageLoader fileInPackage: 'OsmoSIP'.
-
 Osmo.SIPCall subclass: SIPMTCall [
     | remoteLeg sdp_alert msc |
 
-    <category: 'OsmoMSC-SIP'>
+    <category: 'OsmoMSC-Call'>
     <comment: 'I represent a SIP terminated call. It is called Mobile
     Terminated to stay with the GSM speech.'>
 
