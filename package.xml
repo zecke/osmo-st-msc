@@ -11,7 +11,6 @@
     <filein>src/BSCConfig.st</filein>
     <filein>src/BSCListener.st</filein>
     <filein>src/BSCSCCPHandler.st</filein>
-    <filein>src/GSMAuthenticator.st</filein>
     <filein>src/GSMProcessor.st</filein>
     <filein>src/GSMCMServiceRequest.st</filein>
     <filein>src/GSMLURequest.st</filein>
@@ -22,6 +21,9 @@
     <filein>src/call/Extensions.st</filein>
     <filein>src/call/GSMMOCall.st</filein>
     <filein>src/call/SIPMTCall.st</filein>
+    <filein>src/auth/GSMAuthenticatorBase.st</filein>
+    <filein>src/auth/GSMNullAuthenticator.st</filein>
+    <filein>src/auth/GSMIdentityAuthenticator.st</filein>
 
     <test>
         <sunit>OsmoMSC.HLRTest</sunit>

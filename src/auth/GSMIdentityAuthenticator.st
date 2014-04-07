@@ -16,97 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 "
 
-Object subclass: GSMAuthenticatorBase [
-    | connection onAccept onReject |
-    <category: 'OsmoMSC-GSM-Authentication'>
-    <comment: 'I am the base class for authenticating a given
-    subscriber. My subclasses can either allow everyone, store
-    the IMSI and IMEI or be fully GSM compliant and ask a HLR
-    for an authentication tuple.
-    When calling the callbacks make sure to go through the
-    connection>>#takeLocks: selector to take the required locks.'>
-    <import: OsmoGSM>
-
-    LegalMessages := {OsmoGSM.GSM48CMServiceReq.
-                      OsmoGSM.GSM48RRPagingResponse.
-                      OsmoGSM.GSM48LURequest.
-                      "As part of Local-Call-Routing deal with CC Setup"
-                      OsmoGSM.GSM48CCSetup.
-                        }.
-
-    appropriateInitialMessage: aMsg [
-        "Check if the message is one of the allowed initial messages."
-        ^ LegalMessages includes: aMsg class
-    ]
-
-    connection: aCon [
-        <category: 'creation'>
-        connection := aCon.
-    ]
-
-    connection [
-        <category: 'access'>
-        ^ connection
-    ]
-
-    onAccept: aBlock [
-        <category: 'creation'>
-        "Called when the connection is accepted"
-        onAccept := aBlock
-    ]
-
-    onReject: aBlock [
-        <category: 'creation'>
-        "Called when the connection is rejected"
-        onReject := aBlock
-    ]
-
-    start: aMsg [
-        <category: 'auth'>
-        "Start authentication with the initial message."
-        ^ self subclassResponsibility
-    ]
-
-    onData: aMsg [
-        <category: 'auth'>
-        "Called with data from the GSM connection"
-        ^ self subclassResponsibility
-    ]
-
-    cancel [
-        <category: 'auth'>
-        "The GSM Connection has failed cancel everything."
-        ^ self subclassResponsibility
-    ]
-
-    nextPut: aMsg [
-        connection nextPutData: (BSSAPDTAP initWith: aMsg
-                                    linkIdentifier: 0).
-    ]
-]
-
-GSMAuthenticatorBase subclass: GSMNullAuthenticator [
-    <category: 'OsmoMSC-GSM-Authentication'>
-    <comment: 'I accept everything...'>
-
-    start: aMsg [
-        (self appropriateInitialMessage: aMsg)
-            ifTrue:  [onAccept value: self]
-            ifFalse: [onReject value: self].
-    ]
-
-    onData: aMsg [
-        ^ self shouldNotImplement
-    ]
-
-    cancel [
-        "Nothing"
-    ]
-]
 
 GSMAuthenticatorBase subclass: GSMIdentityAuthenticator [
     | state timeout |
-    <category: 'OsmoMSC-GSM-Authentication'>
+    <category: 'OsmoMSC-GSM-Auth'>
     <comment: 'I query for the IMSI and IMEI but do this in an insecure
     way and will never switch on the crypto. I will ask for the IMSI and
     IMEI'>
