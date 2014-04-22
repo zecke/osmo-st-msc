@@ -58,8 +58,12 @@ Osmo.SIPCall subclass: SIPMTCall [
 
         self releaseMscIdentity.
         newLeg := msc selectRedirectFor: self to: aContact.
-        remoteLeg changeRemoteLeg: newLeg.
-        remoteLeg := nil.
+        newLeg isNil
+            ifTrue: [
+                self terminateRemote]
+            ifFalse: [
+                remoteLeg changeRemoteLeg: newLeg
+                remoteLeg := nil].
     ]
 
     sessionNew [
