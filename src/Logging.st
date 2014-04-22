@@ -63,3 +63,16 @@ Osmo.LogArea subclass: LogAreaMSC [
             enabled: true; minLevel: Osmo.LogLevel debug; yourself.
     ]
 ]
+
+Osmo.LogArea subclass: LogAreaMSCSIP [
+    <category: 'OsmoMSC-Logging'>
+
+    LogAreaMSCSIP class >> areaName [^ #mscSIP]
+    LogAreaMSCSIP class >> areaDescription [^'MSC SIP']
+    LogAreaMSCSIP class >> default [
+        ^self new
+            enabled: true;
+            minLevel: Osmo.LogLevel debug;
+            yourself
+    ]
+]

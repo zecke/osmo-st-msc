@@ -7,6 +7,8 @@
     <prereq>OsmoSIP</prereq>
 
     <filein>src/Logging.st</filein>
+    <filein>src/sip/SIPIdentityManager.st</filein>
+    <filein>src/sip/MSCSIPIdentity.st</filein>
     <filein>src/VLR.st</filein>
     <filein>src/HLR.st</filein>
     <filein>src/BSCConfig.st</filein>
@@ -35,6 +37,7 @@
         <sunit>OsmoMSC.BSCIPAConnectionTest</sunit>
         <sunit>OsmoMSC.AuthTestNull</sunit>
         <sunit>OsmoMSC.AuthTestIdentity</sunit>
+        <sunit>OsmoMSC.SIPIdentityManagerTest</sunit>
         <filein>tests/HLRDummyResolver.st</filein>
         <filein>tests/BSCConfigTest.st</filein>
         <filein>tests/BSCIPAConnectionTest.st</filein>
@@ -48,5 +51,7 @@
         <filein>tests/GSMProcessorMockForAuthCheat.st</filein>
         <filein>tests/GSMProcessorMockForAuthIMSI.st</filein>
         <filein>tests/GSMProcessorMockForAuthTimeout.st</filein>
+        <filein>tests/MockSIPUserAgent.st</filein>
+        <filein>tests/SIPIdentityManagerTest.st</filein>
     </test>
 </package>
