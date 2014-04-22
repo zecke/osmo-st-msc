@@ -17,7 +17,7 @@
 "
 
 Osmo.SIPIdentity subclass: MSCSIPIdentity [
-    | available manager registerTimer |
+    | available manager registerTimer usedBy |
     <category: 'OsmoMSC-SIP'>
     <comment: 'I add timers and others to the plain identity. This
     way we can keep track if something is available or not.'>
@@ -80,5 +80,14 @@ Osmo.SIPIdentity subclass: MSCSIPIdentity [
 
     isAvailable [
         ^available
+    ]
+
+    usedBy: aCall [
+        "A SIPCall is using this identity right now."
+        usedBy := aCall
+    ]
+
+    isUnused [
+        ^usedBy isNil
     ]
 ]

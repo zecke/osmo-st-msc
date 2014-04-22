@@ -59,4 +59,8 @@ Object subclass: SIPIdentityManager [
     available [
         ^identities select: [:each | each isAvailable]
     ]
+
+    availableAndUnused [
+        ^identities select: [:each | each isAvailable and: [each isUnused]]
+    ]
 ]

@@ -17,7 +17,7 @@
 "
 
 Osmo.SIPCall subclass: SIPMTCall [
-    | remoteLeg sdp_alert msc |
+    | remoteLeg sdp_alert msc mscIdentity |
 
     <category: 'OsmoMSC-Call'>
     <comment: 'I represent a SIP terminated call. It is called Mobile
@@ -26,6 +26,11 @@ Osmo.SIPCall subclass: SIPMTCall [
     msc: aMsc [
         <category: 'creation'>
         msc := aMsc
+    ]
+
+    mscIdentity: anIdentity [
+        mscIdentity := anIdentity
+        mscIdentity usedBy: self.
     ]
 
     remoteLeg: aLeg [
@@ -43,6 +48,7 @@ Osmo.SIPCall subclass: SIPMTCall [
         clean up things."
 
         remoteLeg := nil.
+        self releaseMscIdentity.
         self terminate.
     ]
 
@@ -50,6 +56,7 @@ Osmo.SIPCall subclass: SIPMTCall [
         | newLeg |
         remoteLeg ifNil: [^self].
 
+        self releaseMscIdentity.
         newLeg := msc selectRedirectFor: self to: aContact.
         remoteLeg changeRemoteLeg: newLeg.
         remoteLeg := nil.
@@ -72,6 +79,11 @@ Osmo.SIPCall subclass: SIPMTCall [
         self terminateRemote.
     ]
 
+    terminate [
+        self releaseMscIdentity.
+        ^super terminate
+    ]
+
     sessionNotification: aNot [
         | code |
         "The session has some information. We will use it to tell
@@ -86,6 +98,7 @@ Osmo.SIPCall subclass: SIPMTCall [
     terminateRemote [
         remoteLeg isNil
             ifFalse: [remoteLeg netTerminate. remoteLeg := nil].
+        self releaseMscIdentity.
     ]
 
     sdp [
@@ -96,5 +109,9 @@ Osmo.SIPCall subclass: SIPMTCall [
     sdpAlert [
         <category: 'audio'>
         ^ sdp_alert
+    ]
+
+    releaseMscIdentity [
+        mscIdentity ifNotNil: [mscIdentity usedBy: nil. mscIdentity := nil].
     ]
 ] 
