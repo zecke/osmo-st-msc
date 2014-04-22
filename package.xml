@@ -4,6 +4,7 @@
     <prereq>OsmoLogging</prereq>
     <prereq>OsmoNetwork</prereq>
     <prereq>OsmoGSM</prereq>
+    <prereq>OsmoSIP</prereq>
 
     <filein>src/Logging.st</filein>
     <filein>src/VLR.st</filein>
@@ -14,12 +15,12 @@
     <filein>src/GSMProcessor.st</filein>
     <filein>src/GSMCMServiceRequest.st</filein>
     <filein>src/GSMLURequest.st</filein>
-    <filein>src/GSMEmergencySetup.st</filein>
     <filein>src/PagingManager.st</filein>
     <filein>src/BSCIPAConnection.st</filein>
     <filein>src/MSC.st</filein>
     <filein>src/call/Extensions.st</filein>
     <filein>src/call/GSMMOCall.st</filein>
+    <filein>src/call/GSMEmergencySetup.st</filein>
     <filein>src/call/SIPMTCall.st</filein>
     <filein>src/auth/GSMAuthenticatorBase.st</filein>
     <filein>src/auth/GSMNullAuthenticator.st</filein>
