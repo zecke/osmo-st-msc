@@ -581,7 +581,7 @@ hosting various transactions and dispatching to them.'>
         endp callId: self generateCallId.
         trans := Osmo.MGCPTransaction on: endp of: self callAgent.
         crcx := (Osmo.MGCPCRCXCommand createCRCX: endp callId: endp callId)
-                    parameterAdd: 'M: recvonly';
+                    addParameter: 'M' with: 'recvonly';
                     yourself.
         trans command: crcx.
         trans onResult: [:endp :result |
@@ -673,7 +673,7 @@ hosting various transactions and dispatching to them.'>
         trans := Osmo.MGCPTransaction on: endp of: self callAgent.
         dlcx := Osmo.MGCPDLCXCommand createDLCX: endp callId: endp callId.
         endp clearCallId.
-        connId isNil ifFalse: [dlcx parameterAdd: 'I: %1' % {connId}].
+        connId isNil ifFalse: [dlcx addParameter: 'I' with: connId].
         trans command: dlcx.
         trans onResult: [:endp :result |
             self takeLocks: [self dlcxResult: result. self mgcpTransFinished: trans]].
@@ -711,8 +711,8 @@ hosting various transactions and dispatching to them.'>
         trans := Osmo.MGCPTransaction on: endp of: self callAgent.
         mdcx := Osmo.MGCPMDCXCommand createMDCX: endp callId: endp callId.
         mdcx
-            parameterAdd: 'I: %1' % {connId};
-            parameterAdd: 'M: %1' % {aState};
+            addParameter: 'I' with: connId;
+            addParameter: 'M' with: aState;
             sdp: aSDPRecord.
         
         trans
