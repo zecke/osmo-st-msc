@@ -62,7 +62,7 @@ Osmo.SIPCall subclass: SIPMTCall [
             ifTrue: [
                 self terminateRemote]
             ifFalse: [
-                remoteLeg changeRemoteLeg: newLeg
+                remoteLeg changeRemoteLeg: newLeg.
                 remoteLeg := nil].
     ]
 
