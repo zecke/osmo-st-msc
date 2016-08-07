@@ -45,7 +45,7 @@ Object subclass: BSCConnection [
 
     BSCConnection class >> createOn: aConfig msc: aMsc [
         <category: 'creation'>
-        ^ self new
+        ^ self basicNew
             instVarNamed: #config put: aConfig;
             instVarNamed: #msc put: aMsc;
             initialize;
